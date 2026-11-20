@@ -1,0 +1,100 @@
+<main class="benefits-page">
+  <header class="benefits-page__heading">
+    <p class="benefits-page__breadcrumb"><a routerLink="/employee-profiles">MI PERFIL</a> / BENEFICIOS</p>
+    <h1>Beneficios y saldos</h1>
+    <p>Consulta los beneficios asignados por tu empresa y tus saldos disponibles.</p>
+  </header>
+
+  @let benefitState = benefitsState();
+  @switch (benefitState.status) {
+    @case ('loading') {
+      <app-loading-state message="Cargando tus beneficios…" />
+    }
+    @case ('error') {
+      <app-error-alert [message]="benefitState.message" retryLabel="Reintentar" (retry)="reload()" />
+    }
+    @case ('empty') {
+      <app-empty-state message="No tienes beneficios asignados" />
+    }
+    @case ('ready') {
+      @if (benefitState.data.benefits.length === 0) {
+        <app-empty-state message="No tienes beneficios asignados" />
+      } @else {
+        @if (daySummaries().length > 0) {
+          <section class="benefits-page__summary" aria-label="Resumen de días disponibles">
+            @for (summary of daySummaries(); track summary.category) {
+              <article class="card benefits-page__summary-card">
+                <div class="benefits-page__summary-title">
+                  @switch (summary.category) {
+                    @case ('vacation') {
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M7 3v4M17 3v4M3 10h18"/></svg>
+                    }
+                    @case ('study') {
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H20v16H6.5A2.5 2.5 0 0 0 4 21zM4 5.5V21M8 7h8M8 11h6"/></svg>
+                    }
+                    @case ('moving') {
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="m3 11 9-7 9 7v9H3zM9 20v-6h6v6"/></svg>
+                    }
+                  }
+                  <span>{{ summary.label }}</span>
+                </div>
+                <div class="benefits-page__available"><strong>{{ summary.benefit.available | number:'1.0-2' }}</strong><span>{{ daysLabel(summary.benefit.available) }} disponibles</span></div>
+                <p class="benefits-page__used">{{ summary.benefit.used | number:'1.0-2' }} utilizados de {{ summary.benefit.assigned | number:'1.0-2' }} asignados</p>
+                <div class="benefits-page__progress" role="progressbar" [attr.aria-label]="summary.label + ': proporción utilizada'" [attr.aria-valuenow]="usedPercent(summary.benefit)" aria-valuemin="0" aria-valuemax="100">
+                  <span [style.width.%]="usedPercent(summary.benefit)"></span>
+                </div>
+                <p class="benefits-page__expiry" [class.benefits-page__expiry--warning]="summary.category === 'vacation' && !!summary.benefit.expiresAt">
+                  @if (summary.benefit.expiresAt) {
+                    Vencen el {{ summary.benefit.expiresAt | date:'dd/MM/yyyy' }}
+                  } @else {
+                    Sin vencimiento establecido
+                  }
+                </p>
+              </article>
+            }
+          </section>
+        }
+
+        <section class="card benefits-page__detail" aria-labelledby="benefits-detail-title">
+          <header class="benefits-page__detail-heading">
+            <div>
+              <h2 id="benefits-detail-title">Detalle de beneficios</h2>
+              <p>Saldos al {{ benefitState.data.asOf | date:'dd/MM/yyyy' }}</p>
+            </div>
+            <span class="benefits-page__badge">Solo consulta</span>
+          </header>
+          <div class="table-wrapper">
+            <table class="data-table benefits-page__table">
+              <caption class="visually-hidden">Beneficios asignados y saldos al {{ benefitState.data.asOf | date:'dd/MM/yyyy' }}</caption>
+              <thead><tr><th scope="col">Beneficio</th><th scope="col" class="data-table__number">Asignado</th><th scope="col" class="data-table__number">Utilizado</th><th scope="col" class="data-table__number">Disponible</th><th scope="col">Vencimiento</th></tr></thead>
+              <tbody>
+                @for (benefit of benefitState.data.benefits; track benefit.id) {
+                  <tr>
+                    <th scope="row">{{ benefit.name }}</th>
+                    <td class="data-table__number">
+                      @if (isMoney(benefit.unit)) { {{ benefit.assigned | money:benefit.unit }} }
+                      @else { {{ benefit.assigned | number:'1.0-2' }} {{ isDays(benefit.unit) ? daysLabel(benefit.assigned) : benefit.unit }} }
+                    </td>
+                    <td class="data-table__number">
+                      @if (isMoney(benefit.unit)) { {{ benefit.used | money:benefit.unit }} }
+                      @else { {{ benefit.used | number:'1.0-2' }} {{ isDays(benefit.unit) ? daysLabel(benefit.used) : benefit.unit }} }
+                    </td>
+                    <td class="data-table__number benefits-page__balance">
+                      @if (isMoney(benefit.unit)) { {{ benefit.available | money:benefit.unit }} }
+                      @else { {{ benefit.available | number:'1.0-2' }} {{ isDays(benefit.unit) ? daysLabel(benefit.available) : benefit.unit }} }
+                    </td>
+                    <td>@if (benefit.expiresAt) { {{ benefit.expiresAt | date:'dd/MM/yyyy' }} } @else { <span class="benefits-page__muted">No aplica</span> }</td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        </section>
+        <aside class="benefits-page__note" aria-label="Cómo se actualizan tus saldos">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 8h.01"/></svg>
+          <div><strong>Cómo se actualizan tus saldos</strong><p>Los días se descuentan cuando se aprueba tu solicitud. Las solicitudes pendientes o rechazadas no descuentan días. Los bonos reflejan las cargas y aprobaciones registradas por Recursos Humanos según la política de tu empresa.</p></div>
+        </aside>
+      }
+    }
+  }
+</main>
