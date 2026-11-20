@@ -1,0 +1,87 @@
+<div class="calendar-page">
+  <header class="calendar-page__heading">
+    <span class="calendar-page__eyebrow">CALENDARIO</span>
+    <h1>Mis ausencias y feriados</h1>
+    <p>Consulta tus ausencias aprobadas y los feriados que te corresponden.</p>
+  </header>
+
+  <section class="calendar-page__card" aria-label="Calendario personal">
+    <div class="calendar-page__toolbar">
+      <div>
+        <h2>{{ monthDate() | date: 'MMMM de yyyy' }}</h2>
+        @let calendar = calendarState();
+        @if (calendar.status === 'ready' && calendar.data.month === month() && calendar.data.year === year()) {
+          <span>Calendario personal de {{ calendar.data.employeeName }}</span>
+        }
+      </div>
+      <div class="calendar-page__controls">
+        <button type="button" aria-label="Mes anterior" (click)="changeMonth(-1)" [disabled]="year() === 1900 && month() === 1">‹</button>
+        <button type="button" aria-label="Mes siguiente" (click)="changeMonth(1)" [disabled]="year() === 2100 && month() === 12">›</button>
+      </div>
+    </div>
+    <div class="calendar-page__legend" aria-label="Tipos de eventos">
+      <span><i class="calendar-page__dot calendar-page__dot--absence" aria-hidden="true"></i>Ausencia aprobada</span>
+      <span><i class="calendar-page__dot calendar-page__dot--holiday" aria-hidden="true"></i>Feriado aplicable</span>
+    </div>
+    <div class="calendar-page__grid" role="grid" aria-label="Días del mes">
+      @for (weekday of weekdays; track weekday) {
+        <div class="calendar-page__weekday" role="columnheader">{{ weekday }}</div>
+      }
+      @for (cell of cells(); track cell.date) {
+        <div class="calendar-page__day" role="gridcell" [class.calendar-page__day--outside]="!cell.inMonth" [class.calendar-page__day--absence]="cell.events.length > 0 && cell.events[0].type === 'APPROVED_ABSENCE'" [class.calendar-page__day--holiday]="cell.events.length > 0 && cell.events[0].type === 'HOLIDAY'" [attr.aria-label]="cell.date">
+          <strong>{{ cell.day }}</strong>
+          @for (event of cell.events; track event.id) {
+            <span class="calendar-page__event" [class.calendar-page__event--holiday]="event.type === 'HOLIDAY'" [title]="event.name">{{ event.name }}</span>
+          }
+        </div>
+      }
+    </div>
+  </section>
+
+  @let state = calendarState();
+  @if (state.status === 'loading' || (state.status === 'ready' && (state.data.month !== month() || state.data.year !== year()))) {
+    <app-loading-state message="Cargando tu calendario…" />
+  } @else {
+    @switch (state.status) {
+      @case ('error') {
+        <app-error-alert message="No pudimos cargar tu calendario. Intenta nuevamente más tarde" retryLabel="Reintentar" (retry)="reload()" />
+      }
+      @case ('empty') {
+        <app-empty-state message="No hay fechas registradas en este mes" />
+      }
+      @case ('ready') {
+        <section class="calendar-page__card calendar-page__records" aria-labelledby="registered-dates">
+          <div class="calendar-page__records-heading">
+            <h2 id="registered-dates">Fechas registradas</h2>
+            <span>{{ state.data.totalEvents }} eventos en {{ monthDate() | date: 'MMMM' }}</span>
+          </div>
+          @if (state.data.events.length === 0) {
+            <app-empty-state message="No hay fechas registradas en este mes" />
+          } @else {
+            @for (event of state.data.events; track event.id) {
+              <div class="calendar-page__record">
+                <i class="calendar-page__dot" [class.calendar-page__dot--absence]="isAbsence(event)" [class.calendar-page__dot--holiday]="!isAbsence(event)" aria-hidden="true"></i>
+                <div class="calendar-page__record-text">
+                  <strong>{{ event.name }}</strong>
+                  <span>
+                    {{ event.startDate | date: 'd MMMM yyyy' }}
+                    @if (event.endDate !== event.startDate) { – {{ event.endDate | date: 'd MMMM yyyy' }} }
+                    @if (event.days !== null) { · {{ event.days }} días }
+                    · {{ isAbsence(event) ? 'Aprobada' : 'Feriado aplicable' }}
+                  </span>
+                </div>
+                @if (isAbsence(event) && event.requestId) {
+                  <span class="calendar-page__request">Solicitud #{{ event.requestId }}</span>
+                } @else if (!isAbsence(event)) {
+                  <span class="calendar-page__badge">Feriado</span>
+                }
+              </div>
+            }
+          }
+        </section>
+      }
+    }
+  }
+  <p class="calendar-page__note">Solo se muestran tus ausencias aprobadas y los feriados aplicables a tu empresa.</p>
+  <a class="calendar-page__link" routerLink="announcements">Leer comunicados →</a>
+</div>

@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "layer": "frontend",
   "kind": "features",
-  "generatedAt": "2026-11-20T12:45:56.074Z",
+  "generatedAt": "2026-11-20T12:59:27.131Z",
   "system": {
     "uid": "bzg7cRXTxYAaBltNBwIC",
     "name": "Colaborador"
@@ -20,6 +20,36 @@
   ],
   "environment": [],
   "modules": [
+    {
+      "moduleName": "employee-home-2",
+      "title": "Calendario personal y comunicados",
+      "featureKeys": [
+        "ee6838c8-1031-4403-9128-02f8cc901791",
+        "b7266c47-98e6-4627-9c69-1532aceed1b5",
+        "8ba384a5-2c23-4813-9837-54c122b9d93a",
+        "8c44a334-5d9f-4b09-85f5-5fd5e6311ab9"
+      ],
+      "services": [
+        {
+          "method": "GET",
+          "path": "/api/employee-homes/calendar",
+          "name": "getMyCalendar",
+          "description": "Consulta las ausencias aprobadas y los feriados aplicables al colaborador para el mes y año indicados."
+        },
+        {
+          "method": "GET",
+          "path": "/api/employee-homes/announcements",
+          "name": "listMyAnnouncements",
+          "description": "Devuelve los comunicados destinados al colaborador, ordenados del más reciente al más antiguo y paginados."
+        },
+        {
+          "method": "GET",
+          "path": "/api/employee-homes/announcements/:id",
+          "name": "getMyAnnouncement",
+          "description": "Devuelve el contenido de un comunicado disponible para el colaborador o responde 404."
+        }
+      ]
+    },
     {
       "moduleName": "overtime-records",
       "title": "Horas extras",
@@ -159,6 +189,27 @@
     "useMock": true,
     "consumedEndpoints": [
       {
+        "moduleName": "employee-home-2",
+        "method": "GET",
+        "path": "/api/employee-homes/calendar",
+        "name": "getMyCalendar",
+        "description": "Consulta las ausencias aprobadas y los feriados aplicables al colaborador para el mes y año indicados."
+      },
+      {
+        "moduleName": "employee-home-2",
+        "method": "GET",
+        "path": "/api/employee-homes/announcements",
+        "name": "listMyAnnouncements",
+        "description": "Devuelve los comunicados destinados al colaborador, ordenados del más reciente al más antiguo y paginados."
+      },
+      {
+        "moduleName": "employee-home-2",
+        "method": "GET",
+        "path": "/api/employee-homes/announcements/:id",
+        "name": "getMyAnnouncement",
+        "description": "Devuelve el contenido de un comunicado disponible para el colaborador o responde 404."
+      },
+      {
         "moduleName": "overtime-records",
         "method": "GET",
         "path": "/api/overtime-records",
@@ -262,8 +313,8 @@
     "Backend: el front arma cada llamada con apiBaseUrl /api (src/environments/environment.backend.ts), /api (src/environments/environment.production.ts), /api (src/environments/environment.ts) + el path del servicio.",
     "Backend: en desarrollo el front redirige /api → http://localhost:8080: el backend tiene que levantar ahí.",
     "Backend: el front levanta en el puerto 4200: ese origen va en la configuración de CORS del backend.",
-    "Backend: el front consume 14 endpoints (frontend.consumedEndpoints); cualquier cambio de method, path o forma de los DTOs lo rompe.",
+    "Backend: el front consume 17 endpoints (frontend.consumedEndpoints); cualquier cambio de method, path o forma de los DTOs lo rompe.",
     "useMock está en true: el front todavía responde con datos mock."
   ],
-  "readme": "# Colaborador · frontend\n\nPortal Angular para consultar la información laboral del colaborador.\n\n## Ejecutar\n\nRequiere Node.js compatible con Angular 22. Ejecuta `npm install` y `npm start` para usar los datos de demostración sin backend. Para conectarte al backend local, inicia primero su API en el puerto 8080 y ejecuta `npm run start:backend`. El proxy de desarrollo dirige `/api` a `http://localhost:8080`.\n\nEjecuta `npm run build` para crear la versión de producción. Este build utiliza `environment.production.ts`: desactiva los mocks y consume `/api` en el mismo origen. En el despliegue, configura el servidor para dirigir ese prefijo al backend.\n\n## Módulos\n\n- Inicio del colaborador: `/employee-homes`.\n- Horas extras: `/overtime-records`.\n- Mi perfil: `/employee-profiles`.\n- Beneficios y saldos: `/employee-benefits`.\n- Acceso al portal: `/login`, gestionado por la sesión de la aplicación.\n\n## Conexión con las otras capas\n\nEl frontend se sirve localmente en `http://localhost:4200` y se comunica exclusivamente con el backend mediante HTTP bajo `/api`; no accede a Firestore. El backend escucha en el puerto 8080 y debe permitir el origen `http://localhost:4200` mediante `FRONT_URL`. El backend utiliza el proyecto Firestore `demo-app` y, en desarrollo, su emulador en `127.0.0.1:8085`; consulta el README de la base de datos para iniciarlo y cargar los datos. La sesión utiliza `POST /api/auth/login`, `GET /api/auth/me` y `POST /api/auth/logout`.\n"
+  "readme": "# Colaborador · frontend\n\nPortal del colaborador desarrollado con Angular 22.\n\n## Desarrollo\n\nRequiere Node.js y npm. Ejecuta `npm install` y `npm start` para abrir la aplicación con datos de demostración en `http://localhost:4200`. La contraseña del modo de demostración es `Demo1234!`.\n\nPara conectarla al backend, inicia primero su API en `http://localhost:8080` y ejecuta `npm run start:backend`. El proxy de desarrollo dirige las solicitudes `/api` a ese puerto. El backend debe permitir el origen `http://localhost:4200` mediante `FRONT_URL`. La sesión utiliza `POST /api/auth/login`, `GET /api/auth/me` y `POST /api/auth/logout`; las pantallas consumen únicamente los endpoints de sus módulos. El frontend no se conecta directamente a Firestore: el backend utiliza `FIREBASE_PROJECT_ID=demo-app` y `FIRESTORE_EMULATOR_HOST=127.0.0.1:8085` en desarrollo.\n\nEjecuta `npm run build` para generar la versión de producción. Esa versión siempre usa el backend, con la API bajo `/api` en el mismo origen; configura el servidor de despliegue para dirigir ese prefijo al backend.\n\n## Módulos\n\n- Inicio del colaborador: `/employee-homes`.\n- Calendario personal y comunicados: `/employee-homes-calendar`.\n- Horas extras: `/overtime-records`.\n- Mi perfil: `/employee-profiles`.\n- Beneficios y saldos: `/employee-benefits`.\n- Acceso al portal: `/login`, gestionado por la sesión de la aplicación.\n"
 }

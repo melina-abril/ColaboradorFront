@@ -7,6 +7,10 @@ export const routes: Routes = [
     loadChildren: () => import('./features/employee-home/employee-home.routes').then(m => m.EMPLOYEE_HOME_ROUTES)
   },
   {
+    path: 'employee-homes-calendar',
+    loadChildren: () => import('./features/employee-home-2/employee-home-2.routes').then(m => m.EMPLOYEE_HOME_2_ROUTES)
+  },
+  {
     path: 'overtime-records',
     loadChildren: () => import('./features/overtime-records/overtime-records.routes').then(m => m.OVERTIME_RECORDS_ROUTES)
   },

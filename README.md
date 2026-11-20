@@ -1,21 +1,20 @@
 # Colaborador · frontend
 
-Portal Angular para consultar la información laboral del colaborador.
+Portal del colaborador desarrollado con Angular 22.
 
-## Ejecutar
+## Desarrollo
 
-Requiere Node.js compatible con Angular 22. Ejecuta `npm install` y `npm start` para usar los datos de demostración sin backend. Para conectarte al backend local, inicia primero su API en el puerto 8080 y ejecuta `npm run start:backend`. El proxy de desarrollo dirige `/api` a `http://localhost:8080`.
+Requiere Node.js y npm. Ejecuta `npm install` y `npm start` para abrir la aplicación con datos de demostración en `http://localhost:4200`. La contraseña del modo de demostración es `Demo1234!`.
 
-Ejecuta `npm run build` para crear la versión de producción. Este build utiliza `environment.production.ts`: desactiva los mocks y consume `/api` en el mismo origen. En el despliegue, configura el servidor para dirigir ese prefijo al backend.
+Para conectarla al backend, inicia primero su API en `http://localhost:8080` y ejecuta `npm run start:backend`. El proxy de desarrollo dirige las solicitudes `/api` a ese puerto. El backend debe permitir el origen `http://localhost:4200` mediante `FRONT_URL`. La sesión utiliza `POST /api/auth/login`, `GET /api/auth/me` y `POST /api/auth/logout`; las pantallas consumen únicamente los endpoints de sus módulos. El frontend no se conecta directamente a Firestore: el backend utiliza `FIREBASE_PROJECT_ID=demo-app` y `FIRESTORE_EMULATOR_HOST=127.0.0.1:8085` en desarrollo.
+
+Ejecuta `npm run build` para generar la versión de producción. Esa versión siempre usa el backend, con la API bajo `/api` en el mismo origen; configura el servidor de despliegue para dirigir ese prefijo al backend.
 
 ## Módulos
 
 - Inicio del colaborador: `/employee-homes`.
+- Calendario personal y comunicados: `/employee-homes-calendar`.
 - Horas extras: `/overtime-records`.
 - Mi perfil: `/employee-profiles`.
 - Beneficios y saldos: `/employee-benefits`.
 - Acceso al portal: `/login`, gestionado por la sesión de la aplicación.
-
-## Conexión con las otras capas
-
-El frontend se sirve localmente en `http://localhost:4200` y se comunica exclusivamente con el backend mediante HTTP bajo `/api`; no accede a Firestore. El backend escucha en el puerto 8080 y debe permitir el origen `http://localhost:4200` mediante `FRONT_URL`. El backend utiliza el proyecto Firestore `demo-app` y, en desarrollo, su emulador en `127.0.0.1:8085`; consulta el README de la base de datos para iniciarlo y cargar los datos. La sesión utiliza `POST /api/auth/login`, `GET /api/auth/me` y `POST /api/auth/logout`.
