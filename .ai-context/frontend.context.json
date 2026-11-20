@@ -1,0 +1,79 @@
+{
+  "schemaVersion": 1,
+  "layer": "frontend",
+  "kind": "structure",
+  "generatedAt": "2026-11-20T11:46:05.590Z",
+  "system": {
+    "uid": "bzg7cRXTxYAaBltNBwIC",
+    "name": "Colaborador"
+  },
+  "architecture": {
+    "name": "Angular 22 · standalone + signals",
+    "stack": "angular"
+  },
+  "repositoryPath": "https://github.com/melina-abril/ColaboradorFront",
+  "ports": [
+    {
+      "port": 4200,
+      "file": "angular.json"
+    }
+  ],
+  "environment": [],
+  "modules": [],
+  "shared": [],
+  "frontend": {
+    "apiBaseUrls": [
+      {
+        "file": "src/environments/environment.backend.ts",
+        "value": "/api"
+      },
+      {
+        "file": "src/environments/environment.production.ts",
+        "value": "/api"
+      },
+      {
+        "file": "src/environments/environment.ts",
+        "value": "/api"
+      }
+    ],
+    "proxies": [
+      {
+        "file": "proxy.conf.json",
+        "context": "/api",
+        "target": "http://localhost:8080"
+      }
+    ],
+    "useMock": true,
+    "consumedEndpoints": [
+      {
+        "moduleName": "",
+        "method": "GET",
+        "path": "/api/auth/me",
+        "name": "me",
+        "description": "Archivo fijo o compartido: src/app/core/session/current-user.ts"
+      },
+      {
+        "moduleName": "",
+        "method": "POST",
+        "path": "/api/auth/login",
+        "name": "login",
+        "description": "Archivo fijo o compartido: src/app/core/session/current-user.ts"
+      },
+      {
+        "moduleName": "",
+        "method": "POST",
+        "path": "/api/auth/logout",
+        "name": "logout",
+        "description": "Archivo fijo o compartido: src/app/core/session/current-user.ts"
+      }
+    ]
+  },
+  "relations": [
+    "Backend: el front arma cada llamada con apiBaseUrl /api (src/environments/environment.backend.ts), /api (src/environments/environment.production.ts), /api (src/environments/environment.ts) + el path del servicio.",
+    "Backend: en desarrollo el front redirige /api → http://localhost:8080: el backend tiene que levantar ahí.",
+    "Backend: el front levanta en el puerto 4200: ese origen va en la configuración de CORS del backend.",
+    "Backend: el front consume 3 endpoints (frontend.consumedEndpoints); cualquier cambio de method, path o forma de los DTOs lo rompe.",
+    "useMock está en true: el front todavía responde con datos mock."
+  ],
+  "readme": "# Colaborador · frontend\n\nEstructura inicial del Portal del colaborador en Angular 22. Aún no hay módulos funcionales; la ruta inicial muestra una bienvenida y la sesión cuenta con una pantalla de acceso.\n\n## Desarrollo\n\nNecesitas Node.js y npm. Ejecuta `npm install` y `npm start` para abrir la aplicación en `http://localhost:4200` con la sesión de demostración. Puedes ingresar con cualquier correo y la contraseña `Demo1234!`.\n\nPara usar el backend local, levántalo en el puerto `8080` y ejecuta `npm run start:backend`. El proxy envía las solicitudes con prefijo `/api` al backend. La sesión utiliza `POST /api/auth/login`, `POST /api/auth/logout` y `GET /api/auth/me`. El backend debe permitir `http://localhost:4200` mediante `FRONT_URL`.\n\n`npm run build` genera la versión de producción con `environment.production.ts`: desactiva los mocks y utiliza `/api` en el mismo origen. Configura el servidor de despliegue para dirigir ese prefijo al backend.\n\n## Módulos\n\nTodavía no hay módulos funcionales. Las rutas y la navegación se ampliarán al incorporarlos.\n\n## Otras capas\n\nEl backend está en un repositorio separado y escucha en el puerto `8080`. Su base Cloud Firestore usa el proyecto `demo-app` y, en desarrollo, un emulador en `127.0.0.1:8085`. El frontend no se conecta directamente a Firestore: todas sus solicitudes pasan por el backend.\n"
+}

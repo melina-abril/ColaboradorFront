@@ -1,0 +1,223 @@
+/* brand-palette:start — managed by the form, do not edit by hand */
+:root {
+  --primary: #4B1F7E;
+  --accent: #7C3CC2;
+  --background: #F8F7FB;
+  --surface: #FFFFFF;
+  --soft-background: #F3EFF8;
+  --active-item: #EDE4F6;
+  --border: #E5DFEA;
+  --text-primary: #25212B;
+  --text-secondary: #6B6574;
+  --success: #268258;
+  --warning: #B26A17;
+  --error: #C03B52;
+}
+/* brand-palette:end */
+
+:root {
+  --brand-main: var(--primary);
+  --brand-accent: var(--accent);
+  --brand-light: var(--active-item);
+  --brand-gradient: linear-gradient(135deg, var(--primary), var(--accent));
+  --page-bg: var(--background);
+  --surface-soft: var(--soft-background);
+  --color-primary: var(--primary);
+  --color-accent: var(--accent);
+  --color-bg: var(--background);
+  --color-background: var(--background);
+  --color-surface: var(--surface);
+  --color-surface-soft: var(--soft-background);
+  --color-border: var(--border);
+  --color-text: var(--text-primary);
+  --color-text-primary: var(--text-primary);
+  --color-text-secondary: var(--text-secondary);
+  --color-success: var(--success);
+  --color-warning: var(--warning);
+  --color-error: var(--error);
+  --font-family: 'Inter', 'Segoe UI', Arial, sans-serif;
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius: 12px;
+  --space-xs: 4px;
+  --space-sm: 8px;
+  --space-md: 16px;
+  --space-lg: 24px;
+  --space-xl: 32px;
+  --shadow-card: 0 3px 16px rgba(43, 24, 66, 0.045);
+  --shadow-hover: 0 8px 24px rgba(43, 24, 66, 0.09);
+}
+
+body {
+  font-family: var(--font-family);
+  background: var(--page-bg);
+  color: var(--text-primary);
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+h1, h2, h3 {
+  color: var(--text-primary);
+  font-weight: 650;
+  letter-spacing: -0.025em;
+}
+
+h1 { font-size: 26px; }
+h2 { font-size: 20px; }
+h3 { font-size: 16px; }
+
+.sidebar, .app-sidebar {
+  background: var(--brand-main);
+  color: var(--surface);
+}
+
+.sidebar a, .app-sidebar a {
+  color: var(--active-item);
+  border-radius: var(--radius-sm);
+  transition: background 0.2s ease;
+}
+
+.sidebar a:hover, .app-sidebar a:hover {
+  background: var(--accent);
+}
+
+.sidebar a.active, .app-sidebar a.active {
+  background: var(--accent);
+  color: var(--surface);
+  font-weight: 600;
+}
+
+.card, .dashboard-card, .panel {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-card);
+}
+
+.dashboard-card {
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.dashboard-card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-hover);
+}
+
+.btn-primary {
+  background: var(--brand-main);
+  color: var(--surface);
+  border: none;
+  border-radius: var(--radius-sm);
+  font-weight: 600;
+  padding: 11px 18px;
+  cursor: pointer;
+  transition: background 0.2s ease, transform 0.2s ease;
+}
+
+.btn-primary:hover {
+  background: var(--brand-accent);
+  transform: translateY(-1px);
+}
+
+.btn-secondary {
+  background: var(--surface-soft);
+  color: var(--brand-main);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+}
+
+input, select, textarea {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  color: var(--text-primary);
+  padding: 10px 12px;
+}
+
+input:focus, select:focus, textarea:focus {
+  outline: 2px solid var(--brand-accent);
+  outline-offset: 1px;
+  border-color: var(--brand-accent);
+}
+
+label {
+  font-weight: 550;
+  color: var(--text-primary);
+}
+
+table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+}
+
+thead { background: var(--soft-background); }
+
+th {
+  color: var(--text-secondary);
+  font-size: 12px;
+  font-weight: 600;
+  text-align: left;
+}
+
+th, td {
+  padding: 13px 16px;
+  border-bottom: 1px solid var(--border);
+}
+
+tbody tr:hover { background: var(--soft-background); }
+
+.badge, .status-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.status-green { background: var(--soft-background); color: var(--success); }
+.status-yellow { background: var(--soft-background); color: var(--warning); }
+.status-red { background: var(--soft-background); color: var(--error); }
+
+.tab.active, .tabs .active {
+  color: var(--brand-main);
+  border-bottom: 2px solid var(--brand-accent);
+  font-weight: 600;
+}
+
+.login-page { background: var(--background); }
+
+.login-card {
+  background: var(--surface);
+  border-radius: 20px;
+  box-shadow: var(--shadow-card);
+}
+
+button:focus-visible, a:focus-visible {
+  outline: 2px solid var(--brand-accent);
+  outline-offset: 3px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    transition: none !important;
+    animation: none !important;
+  }
+}
+
+/* theme-tokens:start — variables del kit que el tema no definía (completadas al generar) */
+:root {
+  --color-on-primary: #ffffff;
+  --color-surface-muted: var(--soft-background);
+  --color-text-muted: var(--text-secondary);
+  --color-focus: var(--accent);
+  --color-info: var(--primary);
+  --color-info-surface: #ede9f2;
+  --color-success-surface: #e5f0eb;
+  --color-warning-surface: #f3e9dc;
+  --color-danger: var(--error);
+  --color-danger-surface: #f9ebee;
+}
+/* theme-tokens:end */
