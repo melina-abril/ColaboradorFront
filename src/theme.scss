@@ -1,4 +1,3 @@
-/* brand-palette:start — managed by the form, do not edit by hand */
 :root {
   --primary: #4B1F7E;
   --accent: #7C3CC2;
@@ -12,14 +11,11 @@
   --success: #268258;
   --warning: #B26A17;
   --error: #C03B52;
-}
-/* brand-palette:end */
 
-:root {
   --color-primary: var(--primary);
   --color-primary-hover: var(--accent);
   --color-accent: var(--accent);
-  --color-bg: var(--background);
+  --color-background: var(--background);
   --color-surface: var(--surface);
   --color-surface-soft: var(--soft-background);
   --color-active: var(--active-item);
@@ -28,31 +24,50 @@
   --color-text-muted: var(--text-secondary);
   --color-success: var(--success);
   --color-warning: var(--warning);
-  --color-danger: var(--error);
   --color-error: var(--error);
-  --color-info: var(--accent);
+
   --font-family: 'Inter', 'Segoe UI', Arial, sans-serif;
   --space-xs: 0.25rem;
   --space-sm: 0.5rem;
   --space-md: 1rem;
   --space-lg: 1.5rem;
   --space-xl: 2rem;
-  --space-2xl: 3rem;
   --radius: 0.75rem;
   --radius-sm: 0.5rem;
+  --radius-md: 0.75rem;
   --radius-lg: 1rem;
   --shadow-card: 0 3px 16px rgba(43, 24, 66, 0.045);
+  --shadow-hover: 0 8px 24px rgba(43, 24, 66, 0.09);
 }
+
+body {
+  font-family: var(--font-family);
+  background: var(--background);
+  color: var(--text-primary);
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+h1, h2, h3 {
+  color: var(--text-primary);
+  font-weight: 650;
+  letter-spacing: -0.025em;
+}
+
+h1 { font-size: 26px; }
+h2 { font-size: 20px; }
+h3 { font-size: 16px; }
 
 /* theme-tokens:start — variables del kit que el tema no definía (completadas al generar) */
 :root {
   --color-on-primary: #ffffff;
-  --color-background: var(--background);
   --color-surface-muted: var(--soft-background);
   --color-focus: var(--accent);
+  --color-info: var(--primary);
   --color-info-surface: #ede9f2;
   --color-success-surface: #e5f0eb;
   --color-warning-surface: #f3e9dc;
+  --color-danger: var(--error);
   --color-danger-surface: #f9ebee;
 }
 /* theme-tokens:end */

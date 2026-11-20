@@ -1,0 +1,75 @@
+<div class="announcements-page">
+  <header class="announcements-page__heading">
+    <span class="announcements-page__eyebrow">COMUNICADOS Y NOTIFICACIONES</span>
+    <h1>Lectura de comunicados</h1>
+    <p>Consulta las novedades publicadas por Recursos Humanos.</p>
+  </header>
+
+  @let state = announcementsState();
+  @switch (state.status) {
+    @case ('loading') {
+      <app-loading-state message="Cargando los comunicados…" />
+    }
+    @case ('error') {
+      <app-error-alert message="No pudimos cargar los comunicados. Intenta nuevamente más tarde" retryLabel="Reintentar" (retry)="reload()" />
+    }
+    @case ('empty') {
+      <app-empty-state message="No hay comunicados publicados" />
+    }
+    @case ('ready') {
+      @if (state.data.totalItems === 0) {
+        <app-empty-state message="No hay comunicados publicados" />
+      } @else {
+        @let featured = featuredState();
+        @if (id() && featured.status === 'loading') {
+          <app-loading-state message="Cargando el comunicado…" />
+        } @else if (id() && featured.status === 'error') {
+          <app-error-alert [message]="featured.message" retryLabel="Reintentar" (retry)="reload()" />
+        } @else {
+          @if (id() && featured.status === 'ready') {
+            <article class="announcements-page__featured" aria-label="Comunicado seleccionado">
+              <div class="announcements-page__featured-top"><span class="announcements-page__badge">Comunicado</span><span>Publicado el {{ featured.data.publishedAt | date: 'd MMMM yyyy' }}</span></div>
+              <div class="announcements-page__title-row"><span class="announcements-page__icon" aria-hidden="true">▣</span><div><h2>{{ featured.data.title }}</h2><span>{{ featured.data.issuer }} · Para {{ featured.data.recipients }}</span></div></div>
+              <p class="announcements-page__body">{{ featured.data.text }}</p>
+            </article>
+          } @else if (page() === 0 && state.data.items.length > 0) {
+            @let latest = state.data.items[0];
+            <article class="announcements-page__featured" aria-label="Comunicado más reciente">
+              <div class="announcements-page__featured-top"><span class="announcements-page__badge">Más reciente</span><span>Publicado el {{ latest.publishedAt | date: 'd MMMM yyyy' }}</span></div>
+              <div class="announcements-page__title-row"><span class="announcements-page__icon" aria-hidden="true">▣</span><div><h2>{{ latest.title }}</h2><span>{{ latest.issuer }} · Para {{ latest.recipients }}</span></div></div>
+              <p class="announcements-page__body">{{ latest.text }}</p>
+            </article>
+          }
+        }
+        <section class="announcements-page__previous" aria-labelledby="previous-title">
+          <div class="announcements-page__previous-heading"><h2 id="previous-title">Publicaciones anteriores</h2><span>{{ state.data.totalItems - 1 }} comunicados</span></div>
+          <div class="announcements-page__list">
+            @for (announcement of state.data.items; track announcement.id) {
+              @if (!(page() === 0 && $first)) {
+                <article class="announcements-page__item">
+                  <button type="button" class="announcements-page__row" [attr.aria-expanded]="expandedId() === announcement.id" (click)="toggle(announcement.id)">
+                    <span class="announcements-page__icon announcements-page__icon--small" aria-hidden="true">▤</span>
+                    <span class="announcements-page__item-title"><strong>{{ announcement.title }}</strong><small>{{ announcement.issuer }} · {{ announcement.publishedAt | date: 'd MMMM yyyy' }}</small></span>
+                    <span class="announcements-page__read">{{ expandedId() === announcement.id ? 'Ocultar comunicado' : 'Leer comunicado' }}</span>
+                    <span class="announcements-page__chevron" aria-hidden="true">⌄</span>
+                  </button>
+                  @if (expandedId() === announcement.id) {
+                    <p class="announcements-page__expanded">{{ announcement.text }}</p>
+                  }
+                </article>
+              }
+            }
+          </div>
+          @if (state.data.totalPages > 1) {
+            <nav class="pagination" aria-label="Páginas de comunicados">
+              <button type="button" class="button button--secondary" [disabled]="page() === 0" (click)="goToPage(page() - 1)">Anterior</button>
+              <span>Página {{ page() + 1 }} de {{ state.data.totalPages }}</span>
+              <button type="button" class="button button--secondary" [disabled]="page() + 1 >= state.data.totalPages" (click)="goToPage(page() + 1)">Siguiente</button>
+            </nav>
+          }
+        </section>
+      }
+    }
+  }
+  <a class="announcements-page__back" routerLink="../..">Volver al calendario</a>
+</div>
