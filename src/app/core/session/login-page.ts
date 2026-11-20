@@ -1,223 +1,152 @@
-import { Component, inject, input, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, input, signal } from '@angular/core';
 import { NonNullableFormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { environment } from '../../../environments/environment';
+import { APP_TITLE } from '../../app.navigation';
 import { errorMessage } from '../http/api-error';
 import { CurrentUser, DEMO_PASSWORD } from './current-user';
 
 @Component({
   selector: 'app-login-page',
-  standalone: true,
   imports: [ReactiveFormsModule],
+  changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    <main class="login-page">
-      <section class="login-card" aria-labelledby="login-title">
-        <div class="login-brand">
-          <span class="login-mark" aria-hidden="true">C</span>
-          <p class="login-brand-name">Colaborador</p>
-          <h1 id="login-title">Bienvenido a tu espacio</h1>
-          <p>Consulta tu información laboral y sigue tus gestiones en un solo lugar.</p>
-        </div>
-        <div class="login-form-panel">
-          <h2>Iniciar sesión</h2>
-          <p class="login-description">Ingresa con tu correo y contraseña.</p>
-          @if (isDemo) {
-            <p class="demo-notice">Modo demostración: usa cualquier correo y la contraseña {{ demoPassword }}.</p>
-          }
+    <main class="login">
+      <section class="login__card" aria-labelledby="login-title">
+        <p class="login__system">{{ title }}</p>
+        <h1 id="login-title">Iniciar sesión</h1>
+        <p class="login__hint">Ingresa con tu correo y tu contraseña para acceder a tu portal.</p>
+
+        <form [formGroup]="form" (ngSubmit)="submit()" novalidate>
+          <div class="form-field">
+            <label for="login-email">Correo</label>
+            <input id="login-email" type="email" formControlName="email" autocomplete="username"
+              [attr.aria-invalid]="showError('email')"
+              [attr.aria-describedby]="showError('email') ? 'login-email-error' : null" />
+            @if (showError('email')) {
+              <span id="login-email-error" class="form-field__error">Ingresa un correo válido.</span>
+            }
+          </div>
+          <div class="form-field">
+            <label for="login-password">Contraseña</label>
+            <input id="login-password" type="password" formControlName="password" autocomplete="current-password"
+              [attr.aria-invalid]="showError('password')"
+              [attr.aria-describedby]="showError('password') ? 'login-password-error' : null" />
+            @if (showError('password')) {
+              <span id="login-password-error" class="form-field__error">Ingresa tu contraseña.</span>
+            }
+          </div>
+
           @if (error(); as message) {
-            <p class="login-error" role="alert">{{ message }}</p>
+            <p class="login__error" role="alert">{{ message }}</p>
           }
-          <form [formGroup]="form" (ngSubmit)="submit()" novalidate>
-            <div class="form-field">
-              <label for="login-email">Correo electrónico</label>
-              <input id="login-email" type="email" autocomplete="username" formControlName="email"
-                [attr.aria-invalid]="showError('email')" [attr.aria-describedby]="showError('email') ? 'login-email-error' : null" />
-              @if (showError('email')) {
-                <small id="login-email-error" class="field-error">Ingresa un correo electrónico válido.</small>
-              }
-            </div>
-            <div class="form-field">
-              <label for="login-password">Contraseña</label>
-              <input id="login-password" type="password" autocomplete="current-password" formControlName="password"
-                [attr.aria-invalid]="showError('password')" [attr.aria-describedby]="showError('password') ? 'login-password-error' : null" />
-              @if (showError('password')) {
-                <small id="login-password-error" class="field-error">Ingresa tu contraseña.</small>
-              }
-            </div>
-            <button type="submit" [disabled]="loading()">{{ loading() ? 'Ingresando…' : 'Ingresar' }}</button>
-          </form>
-        </div>
+
+          <button class="button login__submit" type="submit" [disabled]="loading()">
+            {{ loading() ? 'Ingresando…' : 'Ingresar' }}
+          </button>
+        </form>
+
+        @if (demo) {
+          <p class="login__demo">Modo demostración: usa cualquier correo y la contraseña <strong>{{ demoPassword }}</strong>.</p>
+        }
       </section>
     </main>
   `,
   styles: `
-    :host {
-      display: block;
+    .login {
       width: 100%;
       min-height: 100dvh;
-    }
-    .login-page {
       display: grid;
       place-items: center;
-      width: 100%;
-      min-height: 100dvh;
       padding: var(--space-lg);
-      background: var(--background);
+      background: var(--color-background);
     }
-    .login-card {
+    .login__card {
+      width: min(26rem, 100%);
       display: grid;
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-      width: 100%;
-      min-height: calc(100dvh - 2 * var(--space-lg));
-      overflow: hidden;
-      border: 1px solid var(--border);
-      border-radius: var(--radius-lg);
-      background: var(--surface);
-      box-shadow: var(--shadow-card);
+      gap: var(--space-md);
+      padding: var(--space-lg);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius);
+      background: var(--color-surface);
     }
-    .login-brand {
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      align-items: flex-start;
-      padding: clamp(var(--space-xl), 7vw, 6rem);
-      background: var(--brand-gradient);
-      color: var(--surface);
+    .login__card h1 {
+      margin: 0;
+      color: var(--color-text);
     }
-    .login-mark {
-      display: grid;
-      place-items: center;
-      width: 3rem;
-      height: 3rem;
-      border: 1px solid var(--surface);
-      border-radius: var(--radius-md);
-      font-size: 1.5rem;
-      font-weight: 700;
-    }
-    .login-brand-name {
-      font-size: 1.25rem;
-      font-weight: 700;
-    }
-    .login-brand h1 {
-      color: var(--surface);
-      font-size: clamp(2rem, 4vw, 3rem);
-    }
-    .login-brand p {
-      max-width: 32rem;
-    }
-    .login-form-panel {
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      width: min(100%, 32rem);
-      margin: auto;
-      padding: var(--space-xl);
-    }
-    .login-description {
-      color: var(--text-secondary);
-    }
-    .demo-notice {
-      padding: var(--space-md);
-      border-radius: var(--radius-sm);
-      background: var(--soft-background);
-      color: var(--primary);
-    }
-    .login-error {
-      padding: var(--space-md);
-      border: 1px solid var(--error);
-      border-radius: var(--radius-sm);
-      color: var(--error);
-    }
-    .form-field {
-      display: grid;
-      gap: var(--space-xs);
-      margin-bottom: var(--space-lg);
-    }
-    .form-field input {
-      width: 100%;
-    }
-    .field-error {
-      color: var(--error);
-    }
-    button {
-      width: 100%;
-      padding: var(--space-md);
-      border: 0;
-      border-radius: var(--radius-sm);
-      background: var(--primary);
-      color: var(--surface);
-      font: inherit;
+    .login__system {
+      margin: 0;
+      color: var(--color-primary);
       font-weight: 600;
-      cursor: pointer;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
     }
-    button:disabled {
-      opacity: 0.6;
-      cursor: wait;
+    .login__hint {
+      margin: 0;
+      color: var(--color-text-muted);
     }
-    @media (max-width: 700px) {
-      .login-page {
-        padding: 0;
-      }
-      .login-card {
-        grid-template-columns: 1fr;
-        min-height: 100dvh;
-        border: 0;
-        border-radius: 0;
-      }
-      .login-brand {
-        padding: var(--space-xl);
-      }
-      .login-form-panel {
-        padding: var(--space-xl);
-      }
+    form {
+      display: grid;
+      gap: var(--space-md);
+    }
+    .login__error {
+      margin: 0;
+      padding: var(--space-sm) var(--space-md);
+      border-radius: var(--radius);
+      background: var(--color-danger-surface);
+      color: var(--color-danger);
+    }
+    .login__submit {
+      width: 100%;
+    }
+    .login__demo {
+      margin: 0;
+      color: var(--color-text-muted);
+      font-size: 0.85rem;
     }
   `,
 })
 export class LoginPage {
-  private readonly formBuilder = inject(NonNullableFormBuilder);
+  readonly returnUrl = input<string>();
+
   private readonly currentUser = inject(CurrentUser);
   private readonly router = inject(Router);
-
-  readonly returnUrl = input<string>();
-  readonly error = signal<string | null>(null);
-  readonly loading = signal(false);
-  readonly isDemo = environment.useMock;
-  readonly demoPassword = DEMO_PASSWORD;
-  readonly form = this.formBuilder.group({
+  protected readonly title = APP_TITLE;
+  protected readonly demo = environment.useMock;
+  protected readonly demoPassword = DEMO_PASSWORD;
+  protected readonly loading = signal(false);
+  protected readonly error = signal<string | null>(null);
+  protected readonly submitted = signal(false);
+  protected readonly form = inject(NonNullableFormBuilder).group({
     email: ['', [Validators.required, Validators.email]],
     password: ['', Validators.required],
   });
 
-  showError(field: 'email' | 'password'): boolean {
+  protected showError(field: 'email' | 'password'): boolean {
     const control = this.form.controls[field];
-    return control.invalid && (control.touched || control.dirty);
+    return control.invalid && (control.touched || this.submitted());
   }
 
-  submit(): void {
-    if (this.loading()) return;
+  protected submit(): void {
+    this.submitted.set(true);
     if (this.form.invalid) {
       this.form.markAllAsTouched();
       return;
     }
-
-    this.error.set(null);
-    this.loading.set(true);
     const { email, password } = this.form.getRawValue();
+    this.loading.set(true);
+    this.error.set(null);
     this.currentUser.login(email, password).subscribe({
-      next: () => {
+      next: () => void this.router.navigateByUrl(this.safeReturnUrl()),
+      error: (error: unknown) => {
+        this.error.set(errorMessage(error));
         this.loading.set(false);
-        void this.router.navigateByUrl(this.safeReturnUrl(this.returnUrl()));
-      },
-      error: (cause: unknown) => {
-        this.loading.set(false);
-        this.error.set(errorMessage(cause));
       },
     });
   }
 
-  private safeReturnUrl(value: string | undefined): string {
-    return value?.startsWith('/') && !value.startsWith('//') && !value.includes('\\') && !value.startsWith('/login')
-      ? value
-      : '/';
+  private safeReturnUrl(): string {
+    const target = this.returnUrl();
+    return target?.startsWith('/') && !target.startsWith('//') ? target : '/';
   }
 }
