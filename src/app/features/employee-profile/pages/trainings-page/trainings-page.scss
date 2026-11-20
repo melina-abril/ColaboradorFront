@@ -1,0 +1,162 @@
+.trainings-page {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-lg);
+  color: var(--text-primary);
+}
+
+.trainings-page__tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-md);
+  border-bottom: 1px solid var(--border);
+}
+
+.trainings-page__tabs a {
+  padding: var(--space-sm);
+  color: var(--text-secondary);
+  text-decoration: none;
+}
+
+.trainings-page__tabs a[aria-current='page'] {
+  color: var(--primary);
+  border-bottom: 2px solid var(--accent);
+  font-weight: 600;
+}
+
+.trainings-page__intro span {
+  color: var(--accent);
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.trainings-page__intro h1 {
+  margin: 4px 0;
+  font-size: 26px;
+}
+
+.trainings-page__intro p,
+.trainings-page__heading p,
+.trainings-page__form-panel header p {
+  margin: 0;
+  color: var(--text-secondary);
+  font-size: 13px;
+}
+
+.trainings-page__panel {
+  min-width: 0;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  background: var(--surface);
+  box-shadow: var(--shadow-card);
+}
+
+.trainings-page__heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--border);
+  background: var(--soft-background);
+}
+
+.trainings-page__heading h2,
+.trainings-page__form-panel h2 {
+  margin: 0;
+  font-size: 20px;
+}
+
+.trainings-page__panel td strong,
+.trainings-page__panel td small {
+  display: block;
+}
+
+.trainings-page__panel td small {
+  color: var(--text-secondary);
+}
+
+.trainings-page__file-link,
+.trainings-page__download {
+  padding: 4px;
+  border: 0;
+  background: transparent;
+  color: var(--accent);
+  font: inherit;
+  font-weight: 600;
+  text-align: left;
+  cursor: pointer;
+}
+
+.trainings-page__download {
+  display: block;
+  font-size: 12px;
+}
+
+.trainings-page__file-link:hover,
+.trainings-page__download:hover {
+  text-decoration: underline;
+}
+
+.trainings-page__form-panel {
+  padding: 20px;
+}
+
+.trainings-page__form-panel form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-top: 16px;
+}
+
+.trainings-page__grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.trainings-page__form-panel input,
+.trainings-page__form-panel select {
+  width: 100%;
+  min-height: 42px;
+}
+
+.trainings-page__form-panel input[type='file'] {
+  height: auto;
+  border-style: dashed;
+  background: var(--background);
+  color: var(--text-secondary);
+}
+
+.trainings-page__form-panel small {
+  color: var(--text-secondary);
+}
+
+.trainings-page__form-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 16px;
+  padding-top: 16px;
+  border-top: 1px solid var(--border);
+}
+
+.trainings-page__form-actions span {
+  color: var(--text-secondary);
+  font-size: 12px;
+}
+
+.trainings-page__success {
+  padding: 12px;
+  border-radius: 8px;
+  background: var(--soft-background);
+  color: var(--success);
+  font-weight: 600;
+}
+
+@media (max-width: 640px) {
+  .trainings-page__grid {
+    grid-template-columns: 1fr;
+  }
+}

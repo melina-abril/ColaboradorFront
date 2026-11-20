@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "layer": "frontend",
   "kind": "features",
-  "generatedAt": "2026-11-20T12:13:49.089Z",
+  "generatedAt": "2026-11-20T12:31:47.501Z",
   "system": {
     "uid": "bzg7cRXTxYAaBltNBwIC",
     "name": "Colaborador"
@@ -20,6 +20,62 @@
   ],
   "environment": [],
   "modules": [
+    {
+      "moduleName": "employee-profile",
+      "title": "Mi perfil",
+      "featureKeys": [
+        "0acb4ea7-733d-4594-94aa-21876cfb6bb4",
+        "a47a7644-9b7a-4b06-89ca-f5d2d3731f9c",
+        "df380210-7e2b-44fc-b772-e16f402cc70f"
+      ],
+      "services": [
+        {
+          "method": "GET",
+          "path": "/api/employee-profiles/me",
+          "name": "getMyProfile",
+          "description": "Devuelve los datos personales y laborales del legajo propio y los metadatos del contrato, si existe."
+        },
+        {
+          "method": "GET",
+          "path": "/api/employee-profiles/me/contract",
+          "name": "getMyContract",
+          "description": "Entrega el contrato del legajo propio para abrirlo o descargarlo; responde 404 si no existe."
+        },
+        {
+          "method": "GET",
+          "path": "/api/employee-profiles/me/trainings",
+          "name": "listMyTrainings",
+          "description": "Devuelve la formación del legajo propio y los metadatos de sus documentos."
+        },
+        {
+          "method": "POST",
+          "path": "/api/employee-profiles/me/trainings",
+          "name": "createMyTraining",
+          "description": "Guarda una formación y su único documento en el legajo propio."
+        },
+        {
+          "method": "GET",
+          "path": "/api/employee-profiles/me/trainings/:id/document",
+          "name": "getMyTrainingDocument",
+          "description": "Entrega el documento de una formación del legajo propio para abrirlo o descargarlo."
+        }
+      ]
+    },
+    {
+      "moduleName": "employee-benefits",
+      "title": "Beneficios y saldos",
+      "featureKeys": [
+        "d8bd4092-721e-4a34-be18-91b08d9224eb"
+      ],
+      "services": [
+        {
+          "method": "GET",
+          "path": "/api/employee-benefits",
+          "name": "listMyBenefits",
+          "description": "Devuelve la fecha de referencia y los beneficios asignados al colaborador de la sesión, o una lista vacía si no tiene ninguno."
+        }
+      ]
+    },
     {
       "moduleName": "employee-home",
       "title": "Inicio del colaborador",
@@ -70,6 +126,48 @@
     "useMock": true,
     "consumedEndpoints": [
       {
+        "moduleName": "employee-profile",
+        "method": "GET",
+        "path": "/api/employee-profiles/me",
+        "name": "getMyProfile",
+        "description": "Devuelve los datos personales y laborales del legajo propio y los metadatos del contrato, si existe."
+      },
+      {
+        "moduleName": "employee-profile",
+        "method": "GET",
+        "path": "/api/employee-profiles/me/contract",
+        "name": "getMyContract",
+        "description": "Entrega el contrato del legajo propio para abrirlo o descargarlo; responde 404 si no existe."
+      },
+      {
+        "moduleName": "employee-profile",
+        "method": "GET",
+        "path": "/api/employee-profiles/me/trainings",
+        "name": "listMyTrainings",
+        "description": "Devuelve la formación del legajo propio y los metadatos de sus documentos."
+      },
+      {
+        "moduleName": "employee-profile",
+        "method": "POST",
+        "path": "/api/employee-profiles/me/trainings",
+        "name": "createMyTraining",
+        "description": "Guarda una formación y su único documento en el legajo propio."
+      },
+      {
+        "moduleName": "employee-profile",
+        "method": "GET",
+        "path": "/api/employee-profiles/me/trainings/:id/document",
+        "name": "getMyTrainingDocument",
+        "description": "Entrega el documento de una formación del legajo propio para abrirlo o descargarlo."
+      },
+      {
+        "moduleName": "employee-benefits",
+        "method": "GET",
+        "path": "/api/employee-benefits",
+        "name": "listMyBenefits",
+        "description": "Devuelve la fecha de referencia y los beneficios asignados al colaborador de la sesión, o una lista vacía si no tiene ninguno."
+      },
+      {
         "moduleName": "employee-home",
         "method": "GET",
         "path": "/api/employee-homes/summary",
@@ -103,8 +201,8 @@
     "Backend: el front arma cada llamada con apiBaseUrl /api (src/environments/environment.backend.ts), /api (src/environments/environment.production.ts), /api (src/environments/environment.ts) + el path del servicio.",
     "Backend: en desarrollo el front redirige /api → http://localhost:8080: el backend tiene que levantar ahí.",
     "Backend: el front levanta en el puerto 4200: ese origen va en la configuración de CORS del backend.",
-    "Backend: el front consume 4 endpoints (frontend.consumedEndpoints); cualquier cambio de method, path o forma de los DTOs lo rompe.",
+    "Backend: el front consume 10 endpoints (frontend.consumedEndpoints); cualquier cambio de method, path o forma de los DTOs lo rompe.",
     "useMock está en true: el front todavía responde con datos mock."
   ],
-  "readme": "# Colaborador\n\nPortal Angular del colaborador.\n\n## Desarrollo\n\nRequiere Node.js y npm. Ejecuta `npm install` y luego `npm start` para usar el portal con datos de demostración, sin levantar el backend. Para conectarlo al backend local, inicia ese servicio en el puerto `8080` y ejecuta `npm run start:backend`. El proxy de desarrollo envía las solicitudes bajo `/api` a ese puerto.\n\nEjecuta `npm run build` para generar la versión de producción. Este build usa `environment.production.ts`: desactiva los mocks y llama a `/api` en el mismo origen en el que se despliega el frontend.\n\n## Módulos\n\n- **Inicio del colaborador** (`/employee-homes`): resumen personal de saldos y novedades.\n- **Acceso al portal** (`/login`): inicio de sesión; la ruta y la sesión pertenecen a la infraestructura compartida.\n\n## Conexión con las otras capas\n\nEl backend vive en `https://github.com/melina-abril/ColaboradorBack` y escucha en `8080`. El frontend consume `GET /api/employee-homes/summary` y las rutas de sesión `POST /api/auth/login`, `POST /api/auth/logout` y `GET /api/auth/me`. Para desarrollo conectado, el backend debe admitir el origen `http://localhost:4200` mediante su variable `FRONT_URL`. El frontend no se conecta directamente a Firestore; el backend utiliza `FIREBASE_PROJECT_ID=demo-app` y `FIRESTORE_EMULATOR_HOST=127.0.0.1:8085` para acceder al emulador de la base de datos.\n"
+  "readme": "# Colaborador · frontend\n\nPortal del colaborador desarrollado con Angular 22.\n\n## Ejecutar\n\nSe requieren Node.js y npm. Ejecuta `npm install` y `npm start` para abrir la aplicación en `http://localhost:4200` con los datos de demostración de la configuración fija de desarrollo. La contraseña de demostración es `Demo1234!`.\n\nPara usar el backend local, arráncalo en el puerto `8080` y ejecuta `npm run start:backend`. El proxy fijo envía las solicitudes `/api` al backend; el origen `http://localhost:4200` debe estar permitido mediante `FRONT_URL` en su configuración. La sesión utiliza `POST /api/auth/login`, `GET /api/auth/me` y `POST /api/auth/logout`. Los módulos consumen únicamente los endpoints `/api/employee-homes/summary`, `/api/employee-profiles/me` y sus recursos de contrato y formación, y `/api/employee-benefits`.\n\n`npm run build` genera la versión de producción. Su configuración fija desactiva los mocks y llama a la API bajo `/api` en el mismo origen. El frontend no accede directamente a Firestore: el backend utiliza `FIREBASE_PROJECT_ID=demo-app` y `FIRESTORE_EMULATOR_HOST=127.0.0.1:8085` para conectarse al emulador de la base.\n\n## Módulos\n\n- Inicio del colaborador (`/employee-homes`), pantalla principal.\n- Mi perfil (`/employee-profiles`), incluidos contrato y formación.\n- Beneficios y saldos (`/employee-benefits`).\n- Acceso al portal (`/login`), gestionado por las rutas de sesión existentes.\n"
 }

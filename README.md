@@ -1,18 +1,18 @@
-# Colaborador
+# Colaborador · frontend
 
-Portal Angular del colaborador.
+Portal del colaborador desarrollado con Angular 22.
 
-## Desarrollo
+## Ejecutar
 
-Requiere Node.js y npm. Ejecuta `npm install` y luego `npm start` para usar el portal con datos de demostración, sin levantar el backend. Para conectarlo al backend local, inicia ese servicio en el puerto `8080` y ejecuta `npm run start:backend`. El proxy de desarrollo envía las solicitudes bajo `/api` a ese puerto.
+Se requieren Node.js y npm. Ejecuta `npm install` y `npm start` para abrir la aplicación en `http://localhost:4200` con los datos de demostración de la configuración fija de desarrollo. La contraseña de demostración es `Demo1234!`.
 
-Ejecuta `npm run build` para generar la versión de producción. Este build usa `environment.production.ts`: desactiva los mocks y llama a `/api` en el mismo origen en el que se despliega el frontend.
+Para usar el backend local, arráncalo en el puerto `8080` y ejecuta `npm run start:backend`. El proxy fijo envía las solicitudes `/api` al backend; el origen `http://localhost:4200` debe estar permitido mediante `FRONT_URL` en su configuración. La sesión utiliza `POST /api/auth/login`, `GET /api/auth/me` y `POST /api/auth/logout`. Los módulos consumen únicamente los endpoints `/api/employee-homes/summary`, `/api/employee-profiles/me` y sus recursos de contrato y formación, y `/api/employee-benefits`.
+
+`npm run build` genera la versión de producción. Su configuración fija desactiva los mocks y llama a la API bajo `/api` en el mismo origen. El frontend no accede directamente a Firestore: el backend utiliza `FIREBASE_PROJECT_ID=demo-app` y `FIRESTORE_EMULATOR_HOST=127.0.0.1:8085` para conectarse al emulador de la base.
 
 ## Módulos
 
-- **Inicio del colaborador** (`/employee-homes`): resumen personal de saldos y novedades.
-- **Acceso al portal** (`/login`): inicio de sesión; la ruta y la sesión pertenecen a la infraestructura compartida.
-
-## Conexión con las otras capas
-
-El backend vive en `https://github.com/melina-abril/ColaboradorBack` y escucha en `8080`. El frontend consume `GET /api/employee-homes/summary` y las rutas de sesión `POST /api/auth/login`, `POST /api/auth/logout` y `GET /api/auth/me`. Para desarrollo conectado, el backend debe admitir el origen `http://localhost:4200` mediante su variable `FRONT_URL`. El frontend no se conecta directamente a Firestore; el backend utiliza `FIREBASE_PROJECT_ID=demo-app` y `FIRESTORE_EMULATOR_HOST=127.0.0.1:8085` para acceder al emulador de la base de datos.
+- Inicio del colaborador (`/employee-homes`), pantalla principal.
+- Mi perfil (`/employee-profiles`), incluidos contrato y formación.
+- Beneficios y saldos (`/employee-benefits`).
+- Acceso al portal (`/login`), gestionado por las rutas de sesión existentes.

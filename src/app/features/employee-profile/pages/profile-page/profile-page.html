@@ -1,0 +1,90 @@
+<div class="profile-page">
+  <nav class="profile-page__tabs" aria-label="Mi perfil">
+    <a routerLink="." aria-current="page">Datos y contrato</a>
+    <a routerLink="trainings">Perfil técnico</a>
+  </nav>
+  <header class="profile-page__intro">
+    <span>MI PERFIL</span>
+    <h1>Datos y contrato</h1>
+    <p>Consulta la información de tu legajo y el contrato incorporado por RH.</p>
+  </header>
+
+  @let state = profileState();
+  @switch (state.status) {
+    @case ('loading') {
+      <app-loading-state message="Cargando tus datos…" />
+    }
+    @case ('error') {
+      <app-error-alert message="No pudimos cargar tus datos. Intenta nuevamente más tarde." retryLabel="Reintentar" (retry)="reload()" />
+    }
+    @case ('empty') {
+      <app-error-alert message="No pudimos cargar tus datos. Intenta nuevamente más tarde." retryLabel="Reintentar" (retry)="reload()" />
+    }
+    @case ('ready') {
+      @let profile = state.data;
+      <section class="profile-page__identity card" aria-label="Identificación del colaborador">
+        <div class="profile-page__avatar" aria-hidden="true">{{ profile.firstName.charAt(0) }}{{ profile.lastName.charAt(0) }}</div>
+        <div>
+          <strong>{{ profile.firstName }} {{ profile.lastName }}</strong>
+          <p>Legajo {{ profile.employeeNumber }} · {{ profile.position || 'No informado' }}</p>
+        </div>
+        <span class="profile-page__status">{{ profile.employmentStatus || 'No informado' }}</span>
+      </section>
+
+      <div class="profile-page__columns">
+        <section class="profile-page__panel" aria-labelledby="personal-title">
+          <div class="profile-page__panel-heading"><h2 id="personal-title">Datos personales</h2></div>
+          <dl class="profile-page__fields">
+            <div><dt>Nombre y apellido</dt><dd>{{ profile.firstName }} {{ profile.lastName }}</dd></div>
+            <div><dt>Documento</dt><dd>{{ profile.documentType || 'No informado' }} {{ profile.documentNumber || '' }}</dd></div>
+            <div><dt>Fecha de nacimiento</dt><dd>{{ profile.birthDate ? (profile.birthDate | date: 'dd/MM/yyyy') : 'No informado' }}</dd></div>
+            <div><dt>Correo electrónico</dt><dd>{{ profile.email || 'No informado' }}</dd></div>
+            <div><dt>Teléfono</dt><dd>{{ profile.phone || 'No informado' }}</dd></div>
+            <div><dt>Domicilio</dt><dd>{{ profile.address || 'No informado' }}</dd></div>
+          </dl>
+        </section>
+        <section class="profile-page__panel" aria-labelledby="employment-title">
+          <div class="profile-page__panel-heading"><h2 id="employment-title">Datos laborales</h2></div>
+          <dl class="profile-page__fields">
+            <div><dt>Empresa</dt><dd>{{ profile.companyName }}</dd></div>
+            <div><dt>Legajo</dt><dd>{{ profile.employeeNumber }}</dd></div>
+            <div><dt>Puesto</dt><dd>{{ profile.position || 'No informado' }}</dd></div>
+            <div><dt>Área</dt><dd>{{ profile.department || 'No informado' }}</dd></div>
+            <div><dt>Fecha de ingreso</dt><dd>{{ profile.hireDate ? (profile.hireDate | date: 'dd/MM/yyyy') : 'No informado' }}</dd></div>
+            <div><dt>Modalidad</dt><dd>{{ profile.workArrangement || 'No informado' }}</dd></div>
+            <div><dt>Cliente asignado</dt><dd>{{ profile.clientName || 'Sin cliente asignado' }}</dd></div>
+            <div><dt>Proyecto asignado</dt><dd>{{ profile.projectName || 'Sin proyecto asignado' }}</dd></div>
+          </dl>
+        </section>
+      </div>
+
+      <section class="profile-page__panel" aria-labelledby="contract-title">
+        <div class="profile-page__panel-heading"><h2 id="contract-title">Contrato laboral</h2></div>
+        @if (fileError(); as message) {
+          <app-error-alert [message]="message" />
+        }
+        @if (profile.contract; as contract) {
+          <div class="profile-page__contract">
+            <span class="profile-page__file-icon" aria-hidden="true">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8zM14 2v6h6M8 13h8M8 17h6" /></svg>
+            </span>
+            <div class="profile-page__file-details">
+              <strong>{{ contract.name }}</strong>
+              <p>
+                @if (contract.mimeType) { {{ contract.mimeType }} · }
+                @if (contract.sizeBytes !== null) { {{ contract.sizeBytes / 1024 | number: '1.0-0' }} KB · }
+                @if (contract.uploadedAt) { Incorporado por RH el {{ contract.uploadedAt | date: 'dd/MM/yyyy' }} }
+              </p>
+            </div>
+            <div class="profile-page__actions">
+              <button type="button" class="button button--secondary" [disabled]="fileBusy()" (click)="contractFile('inline', contract.name)">Abrir</button>
+              <button type="button" class="button" [disabled]="fileBusy()" (click)="contractFile('attachment', contract.name)">Descargar</button>
+            </div>
+          </div>
+        } @else {
+          <p class="profile-page__missing">No hay un contrato disponible en tu legajo</p>
+        }
+      </section>
+    }
+  }
+</div>

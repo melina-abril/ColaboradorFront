@@ -1,0 +1,120 @@
+<div class="trainings-page">
+  <nav class="trainings-page__tabs" aria-label="Mi perfil">
+    <a routerLink="..">Datos y contrato</a>
+    <a routerLink="." aria-current="page">Perfil técnico</a>
+  </nav>
+  <header class="trainings-page__intro">
+    <span>MI PERFIL</span>
+    <h1>Perfil técnico</h1>
+    <p>Registra tu formación y adjunta los documentos que RH podrá consultar en tu legajo.</p>
+  </header>
+
+  <section class="trainings-page__panel" aria-labelledby="trainings-title">
+    <div class="trainings-page__heading">
+      <div>
+        <h2 id="trainings-title">Formación registrada</h2>
+        @let state = trainingsState();
+        @if (state.status === 'ready') {
+          <p>{{ state.data.length }} registros en tu legajo</p>
+        } @else if (state.status === 'empty') {
+          <p>0 registros en tu legajo</p>
+        }
+      </div>
+    </div>
+    @if (documentError(); as message) {
+      <app-error-alert [message]="message" />
+    }
+    @let listState = trainingsState();
+    @switch (listState.status) {
+      @case ('loading') {
+        <app-loading-state message="Cargando tu formación…" />
+      }
+      @case ('error') {
+        <app-error-alert message="No pudimos cargar tu formación. Intenta nuevamente más tarde." retryLabel="Reintentar" (retry)="reload()" />
+      }
+      @case ('empty') {
+        <app-empty-state message="Todavía no registraste formación" />
+      }
+      @case ('ready') {
+        @if (listState.data.length === 0) {
+          <app-empty-state message="Todavía no registraste formación" />
+        } @else {
+          <div class="table-wrapper">
+            <table class="data-table">
+              <caption class="visually-hidden">Formación registrada en tu legajo</caption>
+              <thead><tr><th scope="col">Formación</th><th scope="col">Tipo</th><th scope="col">Obtención</th><th scope="col">Documento</th></tr></thead>
+              <tbody>
+                @for (training of listState.data; track training.id) {
+                  <tr>
+                    <td><strong>{{ training.name }}</strong><small>{{ training.institution }}</small></td>
+                    <td>{{ typeLabels[training.type] }}</td>
+                    <td>{{ training.obtainedAt | date: 'MMM yyyy' }}</td>
+                    <td>
+                      @if (training.documentName) {
+                        <button type="button" class="trainings-page__file-link" [disabled]="fileBusy()" (click)="openDocument(training, 'inline')">{{ training.documentName }}</button>
+                        <button type="button" class="trainings-page__download" [disabled]="fileBusy()" (click)="openDocument(training, 'attachment')" [attr.aria-label]="'Descargar ' + training.documentName">Descargar</button>
+                      } @else {
+                        <span>Sin documento</span>
+                      }
+                    </td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        }
+      }
+    }
+  </section>
+
+  <section class="trainings-page__panel trainings-page__form-panel" aria-labelledby="new-training-title">
+    <header>
+      <h2 id="new-training-title">Agregar formación</h2>
+      <p>Completa los datos de tu curso, certificación o título y adjunta su documento.</p>
+    </header>
+    @if (saved()) { <p class="trainings-page__success" role="status">Formación guardada</p> }
+    @if (saveError(); as message) { <app-error-alert [message]="message" /> }
+    <form [formGroup]="form" (ngSubmit)="submit(fileInput)" novalidate>
+      <div class="trainings-page__grid">
+        <div class="form-field">
+          <label for="training-type">Tipo de formación</label>
+          @let typeError = errorFor('type');
+          <select id="training-type" formControlName="type" [attr.aria-invalid]="typeError ? 'true' : null" [attr.aria-describedby]="typeError ? 'training-type-error' : null">
+            <option value="">Selecciona una opción</option>
+            @for (option of types; track option.value) { <option [value]="option.value">{{ option.label }}</option> }
+          </select>
+          @if (typeError) { <span id="training-type-error" class="form-field__error">{{ typeError }}</span> }
+        </div>
+        <div class="form-field">
+          <label for="training-name">Nombre de la formación</label>
+          @let nameError = errorFor('name');
+          <input id="training-name" formControlName="name" placeholder="Ej.: Especialización en ciberseguridad" [attr.aria-invalid]="nameError ? 'true' : null" [attr.aria-describedby]="nameError ? 'training-name-error' : null" />
+          @if (nameError) { <span id="training-name-error" class="form-field__error">{{ nameError }}</span> }
+        </div>
+        <div class="form-field">
+          <label for="training-institution">Institución</label>
+          @let institutionError = errorFor('institution');
+          <input id="training-institution" formControlName="institution" placeholder="Nombre de la institución" [attr.aria-invalid]="institutionError ? 'true' : null" [attr.aria-describedby]="institutionError ? 'training-institution-error' : null" />
+          @if (institutionError) { <span id="training-institution-error" class="form-field__error">{{ institutionError }}</span> }
+        </div>
+        <div class="form-field">
+          <label for="training-date">Fecha de obtención</label>
+          @let dateError = errorFor('obtainedAt');
+          <input id="training-date" type="date" formControlName="obtainedAt" [attr.aria-invalid]="dateError ? 'true' : null" [attr.aria-describedby]="dateError ? 'training-date-error' : null" />
+          @if (dateError) { <span id="training-date-error" class="form-field__error">{{ dateError }}</span> }
+        </div>
+      </div>
+      <div class="form-field">
+        <label for="training-document">Documento de respaldo</label>
+        @let documentFieldError = errorFor('document');
+        <input #fileInput id="training-document" type="file" accept=".pdf,.jpg,.jpeg,.png" (change)="onFileSelected($event)" [attr.aria-invalid]="documentFieldError ? 'true' : null" [attr.aria-describedby]="documentFieldError ? 'training-document-error training-document-hint' : 'training-document-hint'" />
+        <small id="training-document-hint">Adjunta un certificado, constancia o título en PDF, JPG o PNG.</small>
+        @if (documentFieldError) { <span id="training-document-error" class="form-field__error">{{ documentFieldError }}</span> }
+      </div>
+      <div class="trainings-page__form-actions">
+        <span>Al guardar, los datos y el archivo estarán disponibles en tu legajo para RH.</span>
+        <button class="button" type="submit" [disabled]="saving()">{{ saving() ? 'Guardando…' : 'Guardar cambios' }}</button>
+      </div>
+    </form>
+  </section>
+</div>
