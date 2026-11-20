@@ -1,8 +1,8 @@
 {
   "schemaVersion": 1,
   "layer": "frontend",
-  "kind": "structure",
-  "generatedAt": "2026-11-20T11:46:05.590Z",
+  "kind": "features",
+  "generatedAt": "2026-11-20T12:13:49.089Z",
   "system": {
     "uid": "bzg7cRXTxYAaBltNBwIC",
     "name": "Colaborador"
@@ -19,7 +19,31 @@
     }
   ],
   "environment": [],
-  "modules": [],
+  "modules": [
+    {
+      "moduleName": "employee-home",
+      "title": "Inicio del colaborador",
+      "featureKeys": [
+        "0f280802-a8b3-45a1-bc21-59e1a6d10054"
+      ],
+      "services": [
+        {
+          "method": "GET",
+          "path": "/api/employee-homes/summary",
+          "name": "getEmployeeSummary",
+          "description": "Devuelve los saldos, el próximo vencimiento de vacaciones, la última solicitud, la próxima fecha del calendario y el último comunicado del colaborador de la sesión."
+        }
+      ]
+    },
+    {
+      "moduleName": "auth",
+      "title": "Acceso al portal",
+      "featureKeys": [
+        "e3559397-d851-4334-bc61-b9aff94c7dda"
+      ],
+      "services": []
+    }
+  ],
   "shared": [],
   "frontend": {
     "apiBaseUrls": [
@@ -45,6 +69,13 @@
     ],
     "useMock": true,
     "consumedEndpoints": [
+      {
+        "moduleName": "employee-home",
+        "method": "GET",
+        "path": "/api/employee-homes/summary",
+        "name": "getEmployeeSummary",
+        "description": "Devuelve los saldos, el próximo vencimiento de vacaciones, la última solicitud, la próxima fecha del calendario y el último comunicado del colaborador de la sesión."
+      },
       {
         "moduleName": "",
         "method": "GET",
@@ -72,8 +103,8 @@
     "Backend: el front arma cada llamada con apiBaseUrl /api (src/environments/environment.backend.ts), /api (src/environments/environment.production.ts), /api (src/environments/environment.ts) + el path del servicio.",
     "Backend: en desarrollo el front redirige /api → http://localhost:8080: el backend tiene que levantar ahí.",
     "Backend: el front levanta en el puerto 4200: ese origen va en la configuración de CORS del backend.",
-    "Backend: el front consume 3 endpoints (frontend.consumedEndpoints); cualquier cambio de method, path o forma de los DTOs lo rompe.",
+    "Backend: el front consume 4 endpoints (frontend.consumedEndpoints); cualquier cambio de method, path o forma de los DTOs lo rompe.",
     "useMock está en true: el front todavía responde con datos mock."
   ],
-  "readme": "# Colaborador · frontend\n\nEstructura inicial del Portal del colaborador en Angular 22. Aún no hay módulos funcionales; la ruta inicial muestra una bienvenida y la sesión cuenta con una pantalla de acceso.\n\n## Desarrollo\n\nNecesitas Node.js y npm. Ejecuta `npm install` y `npm start` para abrir la aplicación en `http://localhost:4200` con la sesión de demostración. Puedes ingresar con cualquier correo y la contraseña `Demo1234!`.\n\nPara usar el backend local, levántalo en el puerto `8080` y ejecuta `npm run start:backend`. El proxy envía las solicitudes con prefijo `/api` al backend. La sesión utiliza `POST /api/auth/login`, `POST /api/auth/logout` y `GET /api/auth/me`. El backend debe permitir `http://localhost:4200` mediante `FRONT_URL`.\n\n`npm run build` genera la versión de producción con `environment.production.ts`: desactiva los mocks y utiliza `/api` en el mismo origen. Configura el servidor de despliegue para dirigir ese prefijo al backend.\n\n## Módulos\n\nTodavía no hay módulos funcionales. Las rutas y la navegación se ampliarán al incorporarlos.\n\n## Otras capas\n\nEl backend está en un repositorio separado y escucha en el puerto `8080`. Su base Cloud Firestore usa el proyecto `demo-app` y, en desarrollo, un emulador en `127.0.0.1:8085`. El frontend no se conecta directamente a Firestore: todas sus solicitudes pasan por el backend.\n"
+  "readme": "# Colaborador\n\nPortal Angular del colaborador.\n\n## Desarrollo\n\nRequiere Node.js y npm. Ejecuta `npm install` y luego `npm start` para usar el portal con datos de demostración, sin levantar el backend. Para conectarlo al backend local, inicia ese servicio en el puerto `8080` y ejecuta `npm run start:backend`. El proxy de desarrollo envía las solicitudes bajo `/api` a ese puerto.\n\nEjecuta `npm run build` para generar la versión de producción. Este build usa `environment.production.ts`: desactiva los mocks y llama a `/api` en el mismo origen en el que se despliega el frontend.\n\n## Módulos\n\n- **Inicio del colaborador** (`/employee-homes`): resumen personal de saldos y novedades.\n- **Acceso al portal** (`/login`): inicio de sesión; la ruta y la sesión pertenecen a la infraestructura compartida.\n\n## Conexión con las otras capas\n\nEl backend vive en `https://github.com/melina-abril/ColaboradorBack` y escucha en `8080`. El frontend consume `GET /api/employee-homes/summary` y las rutas de sesión `POST /api/auth/login`, `POST /api/auth/logout` y `GET /api/auth/me`. Para desarrollo conectado, el backend debe admitir el origen `http://localhost:4200` mediante su variable `FRONT_URL`. El frontend no se conecta directamente a Firestore; el backend utiliza `FIREBASE_PROJECT_ID=demo-app` y `FIRESTORE_EMULATOR_HOST=127.0.0.1:8085` para acceder al emulador de la base de datos.\n"
 }

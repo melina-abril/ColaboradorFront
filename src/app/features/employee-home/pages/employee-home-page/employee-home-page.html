@@ -1,0 +1,144 @@
+@let summaryStateValue = summaryState();
+@switch (summaryStateValue.status) {
+  @case ('loading') {
+    <app-loading-state message="Cargando tu resumen…" />
+  }
+  @case ('error') {
+    <div class="home-error" role="alert">
+      <p>{{ summaryStateValue.message }}</p>
+      <button type="button" class="button button--secondary" (click)="retry()">Reintentar</button>
+    </div>
+  }
+  @case ('empty') {
+    <p class="home-error">No hay un resumen disponible.</p>
+  }
+  @case ('ready') {
+    @let summary = summaryStateValue.data;
+    <div class="home-page">
+      <section class="home-intro" aria-labelledby="home-title">
+        <div>
+          <p class="home-eyebrow">PORTAL DEL COLABORADOR</p>
+          <h1 id="home-title">Buenos días, {{ summary.employeeName }}</h1>
+          <p class="home-muted">Este es tu resumen al {{ summary.asOf | date: 'd MMMM yyyy' }}.</p>
+        </div>
+        <span class="home-create" aria-label="Crear solicitud: disponible cuando se incorpore el formulario de RH">
+          <span aria-hidden="true">＋</span> Crear solicitud
+        </span>
+      </section>
+
+      <section class="expiration" aria-label="Vencimiento de vacaciones">
+        <div class="expiration__body">
+          <span class="expiration__icon" aria-hidden="true">▣</span>
+          <div>
+            @if (summary.vacationExpiration; as expiration) {
+              <strong>Tienes {{ expiration.days }} días de vacaciones que vencen en {{ expiration.expiresAt | date: 'MMMM yyyy' }}</strong>
+              <p class="home-muted">Están incluidos en tus días disponibles.</p>
+            } @else {
+              <strong>No hay vacaciones próximas a vencer</strong>
+            }
+          </div>
+        </div>
+        @if (summary.vacationExpiration) {
+          <span class="expiration__badge">Próximo vencimiento</span>
+        }
+      </section>
+
+      <section class="balances" aria-labelledby="balances-title">
+        <div class="section-heading">
+          <h2 id="balances-title">Tus días disponibles</h2>
+          <span class="home-muted">Según los movimientos registrados por RH</span>
+        </div>
+        <div class="balances__grid">
+          @for (category of categories; track category) {
+            <article class="balance-card">
+              <div class="balance-card__heading">
+                <h3>{{ categoryLabels[category] }}</h3>
+                @if (summary.balances[category]; as balance) {
+                  <span>{{ balance.assignedDays }} asignados</span>
+                }
+              </div>
+              @if (summary.balances[category]; as balance) {
+                <div class="balance-card__total">
+                  <strong>{{ balance.availableDays }}</strong>
+                  <span>días disponibles</span>
+                </div>
+                <div class="balance-card__usage">
+                  <div class="balance-card__track" role="progressbar" [attr.aria-label]="'Días utilizados de ' + categoryLabels[category]" [attr.aria-valuenow]="balance.usedDays" aria-valuemin="0" [attr.aria-valuemax]="balance.assignedDays">
+                    <div class="balance-card__fill" [style.width.%]="usedPercentage(balance.usedDays, balance.assignedDays)"></div>
+                  </div>
+                  <div class="balance-card__counts">
+                    <span>{{ balance.usedDays }} utilizados</span>
+                    <span>{{ balance.availableDays }} disponibles</span>
+                  </div>
+                </div>
+              } @else {
+                <p class="home-muted">Saldo no disponible</p>
+              }
+            </article>
+          }
+        </div>
+      </section>
+
+      <section class="activity-grid" aria-label="Actividad y accesos">
+        <article class="activity-card">
+          <div class="activity-card__heading">
+            <h3>Tus beneficios</h3>
+            <span class="activity-card__icon" aria-hidden="true">◇</span>
+          </div>
+          <p>Consulta todos los beneficios y saldos correspondientes a tu empresa.</p>
+          <span class="activity-card__unavailable">Ver todos los beneficios →</span>
+        </article>
+
+        <article class="activity-card">
+          <h3>Última solicitud</h3>
+          @if (summary.latestRequest; as request) {
+            <div class="activity-card__heading">
+              <strong>{{ categoryLabels[request.category] }} · {{ request.startDate | date: 'd MMM' }} al {{ request.endDate | date: 'd MMM yyyy' }}</strong>
+              <app-status-badge [label]="requestStatus[request.status].label" [tone]="requestStatus[request.status].tone" />
+            </div>
+            <p>Enviada el {{ request.submittedAt | date: 'd MMMM yyyy' }}</p>
+            <span class="activity-card__unavailable">Ver solicitud →</span>
+          } @else {
+            <p>No hay solicitudes</p>
+          }
+        </article>
+
+        <article class="activity-card activity-card--calendar">
+          @if (summary.nextCalendarEvent; as event) {
+            <div class="calendar-date" aria-hidden="true">
+              <span>{{ event.eventDate | date: 'MMM' }}</span>
+              <strong>{{ event.eventDate | date: 'd' }}</strong>
+            </div>
+            <div>
+              <h3>Próxima fecha del calendario</h3>
+              <div>{{ event.name }}</div>
+              <p>{{ eventLabels[event.type] }} · {{ event.eventDate | date: 'd MMMM yyyy' }}</p>
+              <span class="activity-card__unavailable">Ver calendario →</span>
+            </div>
+          } @else {
+            <div>
+              <h3>Próxima fecha del calendario</h3>
+              <p>No hay próximas fechas</p>
+            </div>
+          }
+        </article>
+
+        <article class="activity-card">
+          <div class="activity-card__heading">
+            <h3>Último comunicado</h3>
+            @if (summary.latestAnnouncement; as announcement) {
+              <span class="home-muted">{{ announcement.publishedAt | date: 'd MMM yyyy' }}</span>
+            }
+          </div>
+          @if (summary.latestAnnouncement; as announcement) {
+            <strong>{{ announcement.title }}</strong>
+            <p>{{ announcement.summary }}</p>
+            <span class="activity-card__unavailable">Leer comunicado →</span>
+          } @else {
+            <p>No hay comunicados</p>
+          }
+        </article>
+      </section>
+    </div>
+  }
+}
