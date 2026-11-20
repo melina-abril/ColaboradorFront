@@ -1,0 +1,181 @@
+<div class="overtime-page">
+  <header class="overtime-page__header">
+    <div>
+      <p class="overtime-page__eyebrow">MIS SOLICITUDES / HORAS EXTRAS</p>
+      <h1>Horas extras</h1>
+      <p class="overtime-page__subtitle">Registra horas previstas o trabajadas y consulta la revisión de RH.</p>
+    </div>
+    <button type="button" class="button overtime-page__new" (click)="openNew()"><span aria-hidden="true">＋</span> Registrar horas extras</button>
+  </header>
+
+  <nav class="overtime-tabs" aria-label="Pestañas de solicitudes">
+    <span class="overtime-tabs__inactive">Solicitudes</span>
+    <span class="overtime-tabs__active" aria-current="page">Horas extras</span>
+  </nav>
+
+  @if (success()) {
+    <p class="overtime-page__success" role="status">Horas extras registradas</p>
+  }
+  @if (selectionLoading()) {
+    <app-loading-state message="Cargando el registro…" />
+  }
+  @if (selectionError(); as message) {
+    <app-error-alert [message]="message" />
+  }
+
+  @let state = listState();
+  @switch (state.status) {
+    @case ('loading') {
+      <app-loading-state message="Cargando tus horas extras…" />
+    }
+    @case ('error') {
+      <app-error-alert message="No pudimos cargar tus horas extras. Intenta nuevamente más tarde." retryLabel="Reintentar" (retry)="reload()" />
+    }
+    @case ('empty') {
+      <app-empty-state message="Todavía no registraste horas extras" />
+    }
+    @case ('ready') {
+      <div class="overtime-totals" aria-label="Resumen de horas extras">
+        <section class="card overtime-total overtime-total--available">
+          <h2>Disponibles para compensación</h2>
+          <strong>{{ state.data.totals.availableForCompensation | number: '1.0-2' }} h</strong>
+          <p>Trabajadas y aprobadas</p>
+        </section>
+        <section class="card overtime-total overtime-total--pending">
+          <h2>Pendientes de revisión</h2>
+          <strong>{{ state.data.totals.pendingReview | number: '1.0-2' }} h</strong>
+          <p>Horas trabajadas</p>
+        </section>
+        <section class="card overtime-total overtime-total--planned">
+          <h2>Horas previstas</h2>
+          <strong>{{ state.data.totals.plannedHours | number: '1.0-2' }} h</strong>
+          <p>Aún no compensables</p>
+        </section>
+      </div>
+    }
+  }
+
+  @if (formOpen()) {
+    <section id="overtime-form" class="card overtime-form" aria-labelledby="overtime-form-title">
+      <div class="overtime-form__heading">
+        <div>
+          <h2 id="overtime-form-title">{{ completing() ? 'Completar horas reales' : 'Nueva carga' }} <span class="overtime-form__required">*</span></h2>
+          <p>Indica cuándo realizarás o realizaste las horas extras.</p>
+        </div>
+        <span class="overtime-form__label">Formulario abierto</span>
+      </div>
+      @if (saveError(); as message) {
+        <app-error-alert [message]="message" />
+      }
+      <form [formGroup]="form" (ngSubmit)="submit()" novalidate>
+        @if (!completing()) {
+          <fieldset class="overtime-form__types">
+            <legend>Tipo de carga</legend>
+            <div class="overtime-form__choices">
+              <label class="overtime-form__choice" [class.overtime-form__choice--selected]="form.controls.type.value === 'PLANNED'">
+                <input type="radio" formControlName="type" value="PLANNED" /> Horas previstas
+              </label>
+              <label class="overtime-form__choice" [class.overtime-form__choice--selected]="form.controls.type.value === 'WORKED'">
+                <input type="radio" formControlName="type" value="WORKED" /> Horas ya trabajadas
+              </label>
+            </div>
+          </fieldset>
+        }
+        <div class="overtime-form__schedule">
+          <div class="form-field">
+            <label for="overtime-date">Fecha</label>
+            @let dateError = errorFor('date');
+            <input id="overtime-date" type="date" formControlName="date" [readOnly]="!!completing()" [attr.aria-invalid]="dateError ? 'true' : null" [attr.aria-describedby]="dateError ? 'overtime-date-error' : null" />
+            @if (dateError) { <span id="overtime-date-error" class="form-field__error">{{ dateError }}</span> }
+          </div>
+          <div class="form-field">
+            <label for="overtime-start">Desde</label>
+            @let startError = errorFor('startTime');
+            <input id="overtime-start" type="time" formControlName="startTime" [attr.aria-invalid]="startError ? 'true' : null" [attr.aria-describedby]="startError ? 'overtime-start-error' : null" />
+            @if (startError) { <span id="overtime-start-error" class="form-field__error">{{ startError }}</span> }
+          </div>
+          <div class="form-field">
+            <label for="overtime-end">Hasta</label>
+            @let endError = errorFor('endTime');
+            <input id="overtime-end" type="time" formControlName="endTime" [attr.aria-invalid]="endError ? 'true' : null" [attr.aria-describedby]="endError ? 'overtime-end-error' : null" />
+            @if (endError) { <span id="overtime-end-error" class="form-field__error">{{ endError }}</span> }
+          </div>
+        </div>
+        <div class="overtime-form__details">
+          <div class="form-field">
+            <label for="overtime-reason">Motivo de las horas extras</label>
+            @let reasonError = errorFor('reason');
+            <input id="overtime-reason" type="text" formControlName="reason" [readOnly]="!!completing()" [attr.aria-invalid]="reasonError ? 'true' : null" [attr.aria-describedby]="reasonError ? 'overtime-reason-error' : null" />
+            @if (reasonError) { <span id="overtime-reason-error" class="form-field__error">{{ reasonError }}</span> }
+          </div>
+          <div class="form-field">
+            <label for="overtime-requested-by">Quién las solicita</label>
+            @let requestedByError = errorFor('requestedBy');
+            <input id="overtime-requested-by" type="text" formControlName="requestedBy" [readOnly]="!!completing()" [attr.aria-invalid]="requestedByError ? 'true' : null" [attr.aria-describedby]="requestedByError ? 'overtime-requested-by-error' : null" />
+            @if (requestedByError) { <span id="overtime-requested-by-error" class="form-field__error">{{ requestedByError }}</span> }
+          </div>
+        </div>
+        <div class="overtime-form__actions">
+          <p>Las horas previstas no estarán disponibles para compensación hasta que registres las horas reales y RH las apruebe.</p>
+          <div>
+            <button type="button" class="button button--secondary" (click)="closeForm()" [disabled]="saving()">Cancelar</button>
+            <button type="submit" class="button" [disabled]="saving()">{{ saving() ? 'Enviando…' : 'Enviar a RH' }}</button>
+          </div>
+        </div>
+      </form>
+    </section>
+  }
+
+  @switch (state.status) {
+    @case ('ready') {
+      <section class="card overtime-history" aria-labelledby="overtime-history-title">
+        <header class="overtime-history__heading">
+          <h2 id="overtime-history-title">Mis registros</h2>
+          <p>{{ state.data.totalItems }} registros · Ordenados del más reciente al más antiguo</p>
+        </header>
+        @if (state.data.items.length === 0) {
+          <app-empty-state message="Todavía no registraste horas extras" />
+        } @else {
+          <div class="table-wrapper">
+            <table class="data-table">
+              <caption class="visually-hidden">Historial de horas extras</caption>
+              <thead><tr><th scope="col">Fecha</th><th scope="col">Horario</th><th scope="col">Carga</th><th scope="col">Horas</th><th scope="col">Estado</th><th scope="col">Acción</th></tr></thead>
+              <tbody>
+                @for (record of state.data.items; track record.id) {
+                  <tr>
+                    <td>{{ record.date | date: 'dd MMM yyyy' }}</td>
+                    <td>{{ record.startTime }}–{{ record.endTime }}</td>
+                    <td>{{ typeInfo[record.type] }}</td>
+                    <td>{{ record.durationHours | number: '1.0-2' }} h</td>
+                    <td><app-status-badge [label]="statusInfo[record.status].label" [tone]="statusInfo[record.status].tone" /></td>
+                    <td>
+                      @switch (record.status) {
+                        @case ('PLANNED') { <button type="button" class="overtime-history__link" (click)="inspect(record.id, 'complete')">Completar horas reales</button> }
+                        @case ('REJECTED') { <button type="button" class="overtime-history__link" (click)="inspect(record.id, 'reason')">Ver motivo</button> }
+                        @case ('APPROVED') { <span class="overtime-history__approved">Compensables</span> }
+                        @default { <span aria-label="Sin acciones">—</span> }
+                      }
+                    </td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+          @if (selected(); as rejected) {
+            <aside class="overtime-history__rejection" aria-label="Motivo del rechazo">
+              <strong>Motivo del rechazo · {{ rejected.date | date: 'dd MMM yyyy' }}</strong>
+              <p>RH indicó: {{ rejected.rejectionReason || 'No hay un motivo disponible.' }} Estas {{ rejected.durationHours | number: '1.0-2' }} h no están disponibles para compensación.</p>
+            </aside>
+          }
+          @if (state.data.totalPages > 1) {
+            <nav class="pagination" aria-label="Paginado de registros">
+              <button type="button" class="button button--secondary" [disabled]="state.data.page === 0" (click)="goToPage(state.data.page - 1)">Anterior</button>
+              <span>Página {{ state.data.page + 1 }} de {{ state.data.totalPages }}</span>
+              <button type="button" class="button button--secondary" [disabled]="state.data.page + 1 >= state.data.totalPages" (click)="goToPage(state.data.page + 1)">Siguiente</button>
+            </nav>
+          }
+        }
+      </section>
+    }
+  }
+</div>
