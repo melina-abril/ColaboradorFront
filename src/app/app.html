@@ -1,9 +1,13 @@
 @if (currentUser.isAuthenticated()) {
-  <a class="skip-link" href="#contenido">Ir al contenido</a>
+  <button class="skip-link" type="button" (click)="content.focus()">Ir al contenido</button>
   <app-header />
   <div class="app-shell">
-    <app-side-nav />
-    <main id="contenido" class="app-content" tabindex="-1">
+    <app-side-nav #sideNav />
+    <main #content id="contenido" class="app-content" tabindex="-1">
+      <div class="app-content__heading">
+        <span class="app-content__eyebrow">PORTAL DEL COLABORADOR</span>
+        <h1>{{ sideNav.activeTitle() }}</h1>
+      </div>
       <router-outlet />
     </main>
   </div>

@@ -6,6 +6,7 @@ export const APP_ROLES: readonly AppRole[] = [];
 
 export const APP_NAVIGATION: readonly NavigationItem[] = [
   { path: '/employee-homes', label: 'Inicio' },
+  { path: '/overtime-records', label: 'Horas extras' },
   { path: '/employee-profiles', label: 'Mi perfil' },
   { path: '/employee-benefits', label: 'Beneficios y saldos' }
 ];

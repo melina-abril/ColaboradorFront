@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "layer": "frontend",
   "kind": "features",
-  "generatedAt": "2026-11-20T12:31:47.501Z",
+  "generatedAt": "2026-11-20T12:45:56.074Z",
   "system": {
     "uid": "bzg7cRXTxYAaBltNBwIC",
     "name": "Colaborador"
@@ -20,6 +20,39 @@
   ],
   "environment": [],
   "modules": [
+    {
+      "moduleName": "overtime-records",
+      "title": "Horas extras",
+      "featureKeys": [
+        "1c75c359-d50d-408b-b2a6-1e9d37f53d43"
+      ],
+      "services": [
+        {
+          "method": "GET",
+          "path": "/api/overtime-records",
+          "name": "listMyOvertimeRecords",
+          "description": "Consulta los registros paginados y los totales de horas compensables, pendientes de revisión y previstas."
+        },
+        {
+          "method": "GET",
+          "path": "/api/overtime-records/:id",
+          "name": "getMyOvertimeRecord",
+          "description": "Consulta un registro propio, incluido el motivo de rechazo cuando corresponda."
+        },
+        {
+          "method": "POST",
+          "path": "/api/overtime-records",
+          "name": "createMyOvertimeRecord",
+          "description": "Registra horas previstas o trabajadas del colaborador autenticado."
+        },
+        {
+          "method": "PATCH",
+          "path": "/api/overtime-records/:id/complete",
+          "name": "completeMyPlannedOvertime",
+          "description": "Completa una previsión propia con los horarios reales sin crear otro registro."
+        }
+      ]
+    },
     {
       "moduleName": "employee-profile",
       "title": "Mi perfil",
@@ -126,6 +159,34 @@
     "useMock": true,
     "consumedEndpoints": [
       {
+        "moduleName": "overtime-records",
+        "method": "GET",
+        "path": "/api/overtime-records",
+        "name": "listMyOvertimeRecords",
+        "description": "Consulta los registros paginados y los totales de horas compensables, pendientes de revisión y previstas."
+      },
+      {
+        "moduleName": "overtime-records",
+        "method": "GET",
+        "path": "/api/overtime-records/:id",
+        "name": "getMyOvertimeRecord",
+        "description": "Consulta un registro propio, incluido el motivo de rechazo cuando corresponda."
+      },
+      {
+        "moduleName": "overtime-records",
+        "method": "POST",
+        "path": "/api/overtime-records",
+        "name": "createMyOvertimeRecord",
+        "description": "Registra horas previstas o trabajadas del colaborador autenticado."
+      },
+      {
+        "moduleName": "overtime-records",
+        "method": "PATCH",
+        "path": "/api/overtime-records/:id/complete",
+        "name": "completeMyPlannedOvertime",
+        "description": "Completa una previsión propia con los horarios reales sin crear otro registro."
+      },
+      {
         "moduleName": "employee-profile",
         "method": "GET",
         "path": "/api/employee-profiles/me",
@@ -201,8 +262,8 @@
     "Backend: el front arma cada llamada con apiBaseUrl /api (src/environments/environment.backend.ts), /api (src/environments/environment.production.ts), /api (src/environments/environment.ts) + el path del servicio.",
     "Backend: en desarrollo el front redirige /api → http://localhost:8080: el backend tiene que levantar ahí.",
     "Backend: el front levanta en el puerto 4200: ese origen va en la configuración de CORS del backend.",
-    "Backend: el front consume 10 endpoints (frontend.consumedEndpoints); cualquier cambio de method, path o forma de los DTOs lo rompe.",
+    "Backend: el front consume 14 endpoints (frontend.consumedEndpoints); cualquier cambio de method, path o forma de los DTOs lo rompe.",
     "useMock está en true: el front todavía responde con datos mock."
   ],
-  "readme": "# Colaborador · frontend\n\nPortal del colaborador desarrollado con Angular 22.\n\n## Ejecutar\n\nSe requieren Node.js y npm. Ejecuta `npm install` y `npm start` para abrir la aplicación en `http://localhost:4200` con los datos de demostración de la configuración fija de desarrollo. La contraseña de demostración es `Demo1234!`.\n\nPara usar el backend local, arráncalo en el puerto `8080` y ejecuta `npm run start:backend`. El proxy fijo envía las solicitudes `/api` al backend; el origen `http://localhost:4200` debe estar permitido mediante `FRONT_URL` en su configuración. La sesión utiliza `POST /api/auth/login`, `GET /api/auth/me` y `POST /api/auth/logout`. Los módulos consumen únicamente los endpoints `/api/employee-homes/summary`, `/api/employee-profiles/me` y sus recursos de contrato y formación, y `/api/employee-benefits`.\n\n`npm run build` genera la versión de producción. Su configuración fija desactiva los mocks y llama a la API bajo `/api` en el mismo origen. El frontend no accede directamente a Firestore: el backend utiliza `FIREBASE_PROJECT_ID=demo-app` y `FIRESTORE_EMULATOR_HOST=127.0.0.1:8085` para conectarse al emulador de la base.\n\n## Módulos\n\n- Inicio del colaborador (`/employee-homes`), pantalla principal.\n- Mi perfil (`/employee-profiles`), incluidos contrato y formación.\n- Beneficios y saldos (`/employee-benefits`).\n- Acceso al portal (`/login`), gestionado por las rutas de sesión existentes.\n"
+  "readme": "# Colaborador · frontend\n\nPortal Angular para consultar la información laboral del colaborador.\n\n## Ejecutar\n\nRequiere Node.js compatible con Angular 22. Ejecuta `npm install` y `npm start` para usar los datos de demostración sin backend. Para conectarte al backend local, inicia primero su API en el puerto 8080 y ejecuta `npm run start:backend`. El proxy de desarrollo dirige `/api` a `http://localhost:8080`.\n\nEjecuta `npm run build` para crear la versión de producción. Este build utiliza `environment.production.ts`: desactiva los mocks y consume `/api` en el mismo origen. En el despliegue, configura el servidor para dirigir ese prefijo al backend.\n\n## Módulos\n\n- Inicio del colaborador: `/employee-homes`.\n- Horas extras: `/overtime-records`.\n- Mi perfil: `/employee-profiles`.\n- Beneficios y saldos: `/employee-benefits`.\n- Acceso al portal: `/login`, gestionado por la sesión de la aplicación.\n\n## Conexión con las otras capas\n\nEl frontend se sirve localmente en `http://localhost:4200` y se comunica exclusivamente con el backend mediante HTTP bajo `/api`; no accede a Firestore. El backend escucha en el puerto 8080 y debe permitir el origen `http://localhost:4200` mediante `FRONT_URL`. El backend utiliza el proyecto Firestore `demo-app` y, en desarrollo, su emulador en `127.0.0.1:8085`; consulta el README de la base de datos para iniciarlo y cargar los datos. La sesión utiliza `POST /api/auth/login`, `GET /api/auth/me` y `POST /api/auth/logout`.\n"
 }
